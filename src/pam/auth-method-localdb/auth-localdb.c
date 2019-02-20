@@ -1,18 +1,18 @@
 /* auth-localdb.c - localdb authentication method for Poldi.
    Copyright (C) 2004, 2005, 2007, 2008, 2009 g10 Code GmbH
- 
+
    This file is part of Poldi.
- 
+
    Poldi is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
- 
+
    Poldi is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, see
    <http://www.gnu.org/licenses/>.  */
@@ -79,6 +79,7 @@ auth_method_localdb_auth_do (poldi_ctx_t ctx,
   size_t challenge_n;
   size_t response_n;
   gcry_sexp_t key;
+  key_types key_type;
   gpg_error_t err;
   char *card_username;
   const char *username;
@@ -142,6 +143,17 @@ auth_method_localdb_auth_do (poldi_ctx_t ctx,
   err = key_lookup_by_serialno (ctx, ctx->cardinfo.serialno, &key);
   if (err)
     goto out;
+
+  /* Retrieve key type */
+  err = get_key_type(ctx, &key_type, key);
+  if(err == 0) {goto out;}
+
+  if (ctx->debug) {
+    log_msg_debug (ctx->loghandle,
+       "Key Type "
+       "`%s'", key_type);
+  }
+
 
   /* Generate challenge.  */
   err = challenge_generate (&challenge, &challenge_n);
