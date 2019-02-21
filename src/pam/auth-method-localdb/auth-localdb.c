@@ -154,7 +154,6 @@ auth_method_localdb_auth_do (poldi_ctx_t ctx,
        "`%s'", key_type);
   }
 
-
   /* Generate challenge.  */
   err = challenge_generate (&challenge, &challenge_n);
   if (err)

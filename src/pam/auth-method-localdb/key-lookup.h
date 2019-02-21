@@ -35,4 +35,6 @@ gpg_error_t key_lookup_by_serialno (poldi_ctx_t ctx,
 /* Get Key Type*/
 int get_key_type(poldi_ctx_t ctx, key_types *key_type, gcry_sexp_t key);
 
+/* returns key type string value*/
+const char* key_type_to_str(key_types key_type);
 #endif

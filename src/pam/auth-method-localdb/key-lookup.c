@@ -146,4 +146,17 @@ int get_key_type(poldi_ctx_t ctx, key_types *key_type, gcry_sexp_t key) {
   return 0;
 }//key_type
 
+/* Returns the String Value of the key type
+   Returns Empty String on error*/
+const char* key_type_to_str(key_types key_type)
+{
+  switch (key_type)
+  {
+    case kType_rsa: return "rsa";
+    case kType_ecc_Ed25519: return "Ed25519";
+  }
+
+  return "";
+}
+
 
