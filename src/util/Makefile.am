@@ -31,7 +31,8 @@ poldi_util_SOURCES = \
 	convert.c \
 	simplelog.c simplelog.h \
 	simpleparse.c simpleparse.h \
-	filenames.c filenames.h
+	filenames.c filenames.h \
+	key-types.c key-types.h
 
 poldi_util_CFLAGS = \
 	-Wall \

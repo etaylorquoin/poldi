@@ -25,16 +25,9 @@
 
 #include <auth-support/ctx.h>
 
-typedef enum{kType_rsa, kType_ecc_Ed25519} key_types;
-
 /* Lookup the key belonging the card specified by SERIALNO.  Returns a
    proper error code.  */
 gpg_error_t key_lookup_by_serialno (poldi_ctx_t ctx,
 				    const char *serialno, gcry_sexp_t *key);
 
-/* Get Key Type*/
-int get_key_type(poldi_ctx_t ctx, key_types *key_type, gcry_sexp_t key);
-
-/* returns key type string value*/
-const char* key_type_to_str(key_types key_type);
 #endif
