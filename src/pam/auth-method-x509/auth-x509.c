@@ -38,7 +38,7 @@
 #include "util/defs.h"
 #include "util/simplelog.h"
 #include "util/simpleparse.h"
-
+#include "util/key-types.h"
 
 
 struct x509_ctx_s
@@ -198,6 +198,7 @@ verify_challenge_sig (poldi_ctx_t ctx, ksba_cert_t cert,
 {
   gcry_sexp_t pubkey;
   gpg_error_t err;
+  key_types key_type = kType_rsa;
 
   pubkey = NULL;
 
@@ -205,7 +206,7 @@ verify_challenge_sig (poldi_ctx_t ctx, ksba_cert_t cert,
   if (err)
     goto out;
 
-  err = challenge_verify (pubkey, challenge, challenge_n,
+  err = challenge_verify (pubkey, key_type, challenge, challenge_n,
 			  response, response_n);
 
  out:
@@ -472,6 +473,7 @@ auth_method_x509_auth_do (poldi_ctx_t ctx, x509_ctx_t cookie,
   char *card_username;
   ksba_cert_t cert;
   dirmngr_ctx_t dirmngr;
+  key_types key_type;
 
   dirmngr = NULL;
   challenge = NULL;
@@ -544,8 +546,8 @@ auth_method_x509_auth_do (poldi_ctx_t ctx, x509_ctx_t cookie,
     }
 
   /*** Generate challenge. ***/
-
-  err = challenge_generate (&challenge, &challenge_n);
+  key_type = kType_rsa;
+  err = challenge_generate (&challenge, &challenge_n, key_type);
   if (err)
     {
       log_msg_error (ctx->loghandle, "failed to generate challenge: %s",
@@ -554,7 +556,7 @@ auth_method_x509_auth_do (poldi_ctx_t ctx, x509_ctx_t cookie,
     }
 
   /*** Let card sign the challenge. ***/
-  err = scd_pksign (ctx->scd, "OPENPGP.3",
+  err = scd_pksign (ctx->scd, "OPENPGP.3", key_type, 
 		    challenge, challenge_n,
 		    &response, &response_n);
   if (err)

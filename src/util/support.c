@@ -1,18 +1,18 @@
 /* support.c - PAM authentication via OpenPGP smartcards.
    Copyright (C) 2004, 2005, 2007, 2008 g10 Code GmbH
- 
+
    This file is part of Poldi.
-  
+
    Poldi is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-  
+
    Poldi is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
@@ -38,7 +38,7 @@
 #include "support.h"
 #include "defs.h"
 
-#define CHALLENGE_MD_ALGORITHM GCRY_MD_SHA1
+
 
 
 
@@ -50,11 +50,23 @@
    it's length in bytes is to be stored in *CHALLENGE_N.  Returns
    proper error code.  */
 gpg_error_t
-challenge_generate (unsigned char **challenge, size_t *challenge_n)
+challenge_generate (unsigned char **challenge, size_t *challenge_n, key_types key_type)
 {
   gpg_error_t err = GPG_ERR_NO_ERROR;
   unsigned char *challenge_new = NULL;
-  size_t challenge_new_n = gcry_md_get_algo_dlen (CHALLENGE_MD_ALGORITHM);
+  size_t challenge_new_n = 0; //gcry_md_get_algo_dlen (CHALLENGE_MD_ALGORITHM);
+
+  //determine challange size based on hashing algorithm
+  switch (key_type)
+  {
+    case kType_rsa:
+      challenge_new_n = gcry_md_get_algo_dlen (GCRY_MD_SHA256);
+      break;
+
+    case kType_ecc_Ed25519:
+      challenge_new_n = gcry_md_get_algo_dlen (GCRY_MD_SHA512);
+      break;
+  }//switch
 
   challenge_new = xtrymalloc (challenge_new_n);
   if (! challenge_new)
@@ -79,7 +91,7 @@ challenge_release (unsigned char *challenge)
 }
 
 static gpg_error_t
-challenge_verify_sexp (gcry_sexp_t sexp_key,
+challenge_verify_sexp (gcry_sexp_t sexp_key, key_types key_type,
 		       unsigned char *challenge, size_t challenge_n,
 		       unsigned char *response, size_t response_n)
 {
@@ -88,22 +100,58 @@ challenge_verify_sexp (gcry_sexp_t sexp_key,
   gcry_sexp_t sexp_data = NULL;
   gcry_mpi_t mpi_signature = NULL;
 
-  /* Convert buffers into MPIs.  */
-  if (! err)
-    {
-      if (gcry_mpi_scan (&mpi_signature, GCRYMPI_FMT_USG, response, response_n,
-			 NULL))
-	err = gpg_error (GPG_ERR_BAD_MPI);
-    }
+  // /* Convert buffers into MPIs.  */
+  // if (! err)
+  //   {
+  //     if (gcry_mpi_scan (&mpi_signature, GCRYMPI_FMT_USG, response, response_n,
+	// 		 NULL))
+	// err = gpg_error (GPG_ERR_BAD_MPI);
+  //   }
 
   /* Create according S-Expressions.  */
-  if (! err)
-    err = gcry_sexp_build (&sexp_data, NULL,
-			   "(data (flags pkcs1) (hash sha1 %b))",
-			   challenge_n, challenge);
-  if (! err)
-    err = gcry_sexp_build (&sexp_signature, NULL, "(sig-val (rsa (s %m)))",
-			   mpi_signature);
+  if (! err) {
+    //set data hash type based on key type
+    switch (key_type)
+    {
+      case kType_rsa:
+        err = gcry_sexp_build (&sexp_data, NULL,
+             "(data (flags pkcs1) (hash sha256 %b))",
+             challenge_n, challenge);
+        break;
+
+      case kType_ecc_Ed25519:
+        err = gcry_sexp_build (&sexp_data, NULL,
+             "(data(flags eddsa)(hash-algo sha512)(value %b))",
+             challenge_n, challenge);
+        break;
+
+      default:
+        err = GPG_ERR_CONFIGURATION;
+    }//switch
+
+
+       }
+
+  if (! err) {
+      //set sig value based on key type key type
+      switch (key_type)
+      {
+        case kType_rsa:
+        err = gcry_sexp_build (&sexp_signature, NULL, "(sig-val(rsa(s%b)))",
+             response_n,response);
+          break;
+
+        case kType_ecc_Ed25519:
+        err = gcry_sexp_build (&sexp_signature, NULL, "(sig-val(eddsa(r%b)(s%b)))",
+                               response_n/2, response,
+                               response_n/2, response + response_n/2);
+          break;
+
+        default:
+          err = GPG_ERR_CONFIGURATION;
+      }//switch
+
+    }
 
   /* Verify.  */
   if (! err)
@@ -125,13 +173,13 @@ challenge_verify_sexp (gcry_sexp_t sexp_key,
    the secret key belonging to the public key given as PUBLIC_KEY.
    Returns proper error code.  */
 gpg_error_t
-challenge_verify (gcry_sexp_t public_key,
+challenge_verify (gcry_sexp_t public_key, key_types key_type,
 		  unsigned char *challenge, size_t challenge_n,
 		  unsigned char *response, size_t response_n)
 {
   gpg_error_t err;
 
-  err = challenge_verify_sexp (public_key,
+  err = challenge_verify_sexp (public_key, key_type,
 			       challenge, challenge_n, response, response_n);
 
   return err;
@@ -186,7 +234,7 @@ sexp_to_string (gcry_sexp_t sexp, char **sexp_string)
 
   *sexp_string = buffer;
   err = 0;
-  
+
  out:
 
   if (err)
@@ -372,7 +420,7 @@ int
 my_strlen (const char *s)
 {
   int ret = 0;
-  
+
   while (*s)
     {
       if (ret == INT_MAX)

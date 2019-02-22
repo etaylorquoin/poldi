@@ -1,7 +1,5 @@
 #include "key-types.h"
 
-
-
 /* Lookup key type ex, rsa, ecc, returns 0 on error and 1 otherwise
    Currenly Only Supporting rsa and ed25519*/
 int get_key_type(key_types *key_type, gcry_sexp_t key) {

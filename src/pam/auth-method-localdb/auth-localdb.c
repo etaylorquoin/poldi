@@ -33,6 +33,7 @@
 
 #include "scd/scd.h"
 #include "util/support.h"
+#include "util/key-types.h"
 #include "auth-support/ctx.h"
 #include "auth-support/wait-for-card.h"
 
@@ -145,17 +146,23 @@ auth_method_localdb_auth_do (poldi_ctx_t ctx,
     goto out;
 
   /* Retrieve key type */
-  err = get_key_type(ctx, &key_type, key);
-  if(err == 0) {goto out;}
+  err = get_key_type(&key_type, key);
+  if(err == 0) {
+    //unsupported crypto
+    log_msg_error (ctx->loghandle,
+       "Unsupported Key Type\n");
+
+       goto out;
+     }
 
   if (ctx->debug) {
     log_msg_debug (ctx->loghandle,
        "Key Type "
-       "`%s'", key_type);
+       "`%s'", key_type_to_str(key_type));
   }
 
   /* Generate challenge.  */
-  err = challenge_generate (&challenge, &challenge_n);
+  err = challenge_generate (&challenge, &challenge_n, key_type);
   if (err)
     {
       log_msg_error (ctx->loghandle,
@@ -165,7 +172,7 @@ auth_method_localdb_auth_do (poldi_ctx_t ctx,
     }
 
   /* Let card sign the challenge.  */
-  err = scd_pksign (ctx->scd, "OPENPGP.3",
+  err = scd_pksign (ctx->scd, "OPENPGP.3", key_type,
 		    challenge, challenge_n,
 		    &response, &response_n);
   if (err)
@@ -177,7 +184,7 @@ auth_method_localdb_auth_do (poldi_ctx_t ctx,
     }
 
   /* Verify response.  */
-  err = challenge_verify (key, challenge, challenge_n, response, response_n);
+  err = challenge_verify (key, key_type, challenge, challenge_n, response, response_n);
   if (err)
     {
       log_msg_error (ctx->loghandle, "failed to verify challenge");

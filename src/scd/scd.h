@@ -1,18 +1,18 @@
 /* scd.h - Interface to Scdaemon
-   Copyright (C) 2007, 2008, 2009 g10code GmbH. 
+   Copyright (C) 2007, 2008, 2009 g10code GmbH.
 
    This file is part of Poldi.
- 
+
    Poldi is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
- 
+
    Poldi is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, see
    <http://www.gnu.org/licenses/>.  */
@@ -23,6 +23,7 @@
 #include <poldi.h>
 
 #include "util/simplelog.h"
+#include "util/key-types.h"
 
 struct scd_context;
 
@@ -81,6 +82,7 @@ void scd_release_cardinfo (struct scd_cardinfo cardinfo);
    *R_BUF, *R_BUFLEN will hold the length of the signature. */
 gpg_error_t scd_pksign (scd_context_t ctx,
 			const char *keyid,
+      key_types key_type,
 			const unsigned char *indata, size_t indatalen,
 			unsigned char **r_buf, size_t *r_buflen);
 
