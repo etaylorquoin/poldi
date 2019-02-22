@@ -100,14 +100,6 @@ challenge_verify_sexp (gcry_sexp_t sexp_key, key_types key_type,
   gcry_sexp_t sexp_data = NULL;
   gcry_mpi_t mpi_signature = NULL;
 
-  // /* Convert buffers into MPIs.  */
-  // if (! err)
-  //   {
-  //     if (gcry_mpi_scan (&mpi_signature, GCRYMPI_FMT_USG, response, response_n,
-	// 		 NULL))
-	// err = gpg_error (GPG_ERR_BAD_MPI);
-  //   }
-
   /* Create according S-Expressions.  */
   if (! err) {
     //set data hash type based on key type

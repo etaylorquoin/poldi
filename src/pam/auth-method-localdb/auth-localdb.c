@@ -154,7 +154,7 @@ auth_method_localdb_auth_do (poldi_ctx_t ctx,
 
        goto out;
      }
-
+  /*Print out key type if debug is enabled */
   if (ctx->debug) {
     log_msg_debug (ctx->loghandle,
        "Key Type "
