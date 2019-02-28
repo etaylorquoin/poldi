@@ -40,9 +40,10 @@
 #include "usersdb.h"
 #include "key-lookup.h"
 
-
+#include "debugTools.h"
 
 #if 0
+
 /* Currently, the localdb method doesn't require a special cookie. */
 
 static gpg_error_t
@@ -182,6 +183,40 @@ auth_method_localdb_auth_do (poldi_ctx_t ctx,
 		     gpg_strerror (err));
       goto out;
     }
+
+  /*DEBUG LOG S Expressions */
+  if (ctx->debug) {
+    char outBuff[4096];
+    gcry_sexp_t sexp_signature = NULL;
+
+    switch (key_type)
+    {
+      case kType_rsa:
+      err = gcry_sexp_build (&sexp_signature, NULL, "(sig-val(rsa(s%b)))",
+           response_n,response);
+        break;
+
+      case kType_ecc_Ed25519:
+      err = gcry_sexp_build (&sexp_signature, NULL, "(sig-val(eddsa(r%b)(s%b)))",
+                             (int)response_n/2, response,
+                             (int)response_n/2, response + response_n/2);
+        break;
+
+      default:
+        err = GPG_ERR_CONFIGURATION;
+    }//switch
+    //log public key
+    log_msg_debug(ctx->loghandle, "%s","Public_KEY");
+    sprintSEXP_Ed25519(key, outBuff, 4096);
+    log_msg_debug(ctx->loghandle, "\n%s\n",outBuff);
+    outBuff[0] = 0;
+
+    //log Signature
+    log_msg_debug(ctx->loghandle, "%s","Signature");
+    sprintSEXP_Ed25519(sexp_signature, outBuff, 4096);
+    log_msg_debug(ctx->loghandle, "\n%s\n",outBuff);
+    outBuff[0] = 0;
+  }//if debug
 
   /* Verify response.  */
   err = challenge_verify (key, key_type, challenge, challenge_n, response, response_n);
