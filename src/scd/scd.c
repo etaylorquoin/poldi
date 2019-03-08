@@ -746,7 +746,7 @@ scd_pksign (scd_context_t ctx,
       break;
 
     case kType_ecc_Ed25519:
-      hashAlgo = "--hash=sha512";
+      hashAlgo = "";//default is sha512, setting that here causes scd to generate an invalid SIG
       break;
 
     default:
