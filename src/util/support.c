@@ -98,7 +98,6 @@ challenge_verify_sexp (gcry_sexp_t sexp_key, key_types key_type,
   gpg_error_t err = GPG_ERR_NO_ERROR;
   gcry_sexp_t sexp_signature = NULL;
   gcry_sexp_t sexp_data = NULL;
-  gcry_mpi_t mpi_signature = NULL;
 
   /* Create according S-Expressions.  */
   if (! err) {
@@ -153,8 +152,6 @@ challenge_verify_sexp (gcry_sexp_t sexp_key, key_types key_type,
     gcry_sexp_release (sexp_data);
   if (sexp_signature)
     gcry_sexp_release (sexp_signature);
-  if (mpi_signature)
-    gcry_mpi_release (mpi_signature);
 
   return err;
 }

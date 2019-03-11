@@ -217,6 +217,10 @@ auth_method_localdb_auth_do (poldi_ctx_t ctx,
     sprintSEXP_Ed25519(sexp_signature, outBuff, 4096);
     log_msg_debug(ctx->loghandle, "Signature: %s",outBuff);
     outBuff[0] = 0;
+
+    //free resources
+    gcry_sexp_release(sexp_signature);
+
   }//if debug
 
   /* Verify response.  */
