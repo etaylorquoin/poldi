@@ -148,7 +148,7 @@ auth_method_localdb_auth_do (poldi_ctx_t ctx,
 
   /* Retrieve key type */
   err = get_key_type(&key_type, key);
-  if(err == 0) {
+  if(err) {
     //unsupported crypto
     log_msg_error (ctx->loghandle,
        "Unsupported Key Type\n");
