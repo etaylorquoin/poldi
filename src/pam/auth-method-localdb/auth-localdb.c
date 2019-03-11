@@ -206,15 +206,16 @@ auth_method_localdb_auth_do (poldi_ctx_t ctx,
         err = GPG_ERR_CONFIGURATION;
     }//switch
     //log public key
-    log_msg_debug(ctx->loghandle, "%s","Public_KEY");
+    //log_msg_debug(ctx->loghandle, "%s","Public_KEY");
+    outBuff[0] = 0;
     sprintSEXP_Ed25519(key, outBuff, 4096);
-    log_msg_debug(ctx->loghandle, "\n%s\n",outBuff);
+    log_msg_debug(ctx->loghandle, "Public_KEY: %s",outBuff);
     outBuff[0] = 0;
 
     //log Signature
-    log_msg_debug(ctx->loghandle, "%s","Signature");
+    //log_msg_debug(ctx->loghandle, "%s","Signature");
     sprintSEXP_Ed25519(sexp_signature, outBuff, 4096);
-    log_msg_debug(ctx->loghandle, "\n%s\n",outBuff);
+    log_msg_debug(ctx->loghandle, "Signature: %s",outBuff);
     outBuff[0] = 0;
   }//if debug
 
