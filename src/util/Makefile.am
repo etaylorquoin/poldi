@@ -11,7 +11,7 @@
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 # or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
 # License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
@@ -32,7 +32,8 @@ poldi_util_SOURCES = \
 	simplelog.c simplelog.h \
 	simpleparse.c simpleparse.h \
 	filenames.c filenames.h \
-	key-types.c key-types.h
+	key-types.c key-types.h \
+	debugTools.c debugTools.h
 
 poldi_util_CFLAGS = \
 	-Wall \

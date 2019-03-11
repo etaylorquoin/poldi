@@ -34,13 +34,13 @@
 #include "scd/scd.h"
 #include "util/support.h"
 #include "util/key-types.h"
+#include "util/debugTools.h"
 #include "auth-support/ctx.h"
 #include "auth-support/wait-for-card.h"
 
 #include "usersdb.h"
 #include "key-lookup.h"
 
-#include "debugTools.h"
 
 #if 0
 

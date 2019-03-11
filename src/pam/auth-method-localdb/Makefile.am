@@ -34,8 +34,7 @@ noinst_LIBRARIES = libpoldi-auth-localdb.a
 libpoldi_auth_localdb_a_SOURCES = \
  auth-localdb.c defs-localdb.h \
  key-lookup.c key-lookup.h \
- usersdb.h usersdb.c \
- debugTools.h debugTools.c
+ usersdb.h usersdb.c
 
 libpoldi_auth_localdb_a_CFLAGS = \
 	-Wall -fPIC -I$(top_srcdir)/src/pam -I$(top_srcdir)/src \
