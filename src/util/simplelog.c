@@ -228,7 +228,7 @@ static gpg_error_t
 internal_log_write (log_handle_t handle, log_level_t level,
 		    const char *fmt, va_list ap)
 {
-  gpg_error_t err;
+  gpg_error_t err = 0;
 
   assert (handle->backend != LOG_BACKEND_NONE);
 
@@ -270,7 +270,6 @@ internal_log_write (log_handle_t handle, log_level_t level,
 	}
 	  
       vsyslog (LOG_MAKEPRI (LOG_AUTH, syslog_priority), fmt, ap);
-      err = 0;
     }
   else if (handle->backend == LOG_BACKEND_STREAM
 	   || handle->backend == LOG_BACKEND_FILE)
@@ -314,7 +313,6 @@ internal_log_write (log_handle_t handle, log_level_t level,
       vfprintf (stream, fmt, ap);
       putc ('\n', stream);
 
-      err = 0;
     }
 
   return err;
