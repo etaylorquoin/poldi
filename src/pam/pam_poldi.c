@@ -35,6 +35,7 @@
 
 #include "util/simplelog.h"
 #include "util/simpleparse.h"
+#include "util/support.h"
 #include "util/defs.h"
 #include "scd/scd.h"
 
@@ -547,15 +548,15 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
       log_msg_error (ctx->loghandle, "Can't retrieve username from PAM");
     }
 
-  /*** Check if we use gpg-agent. ***/
-  {
+  /*** Check if we use gpg-agent. and start it if needed ***/
+
     struct passwd *pw;
     pw = getpwuid (getuid ());
 
     if (pw == NULL)
       {
-	err = gpg_error_from_syserror ();
-	goto out;
+		err = gpg_error_from_syserror ();
+		goto out;
       }
 
     /* Supporting backward compatibility of old Poldi.
@@ -564,8 +565,48 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
      * use smartcard using the existing scdaemon under gpg-agent.
      */
     if (pam_username && !strcmp (pw->pw_name, pam_username))
-      use_agent = 1;
-  }
+    	{
+    		log_msg_error (ctx->loghandle, "Using existing scdaemon under gpg-agent");
+    		use_agent = 1;
+    	}
+    else//start gpg-agent under users profile
+    {
+    	log_msg_error (ctx->loghandle, "Attempting to start gpg-agent");
+    	if(pam_username != NULL)
+    	{
+    		log_msg_error (ctx->loghandle, "Attempting to start gpg-agent pam username found: %s", pam_username);
+    		pw = getpwnam(pam_username);
+    		if (pw == NULL)
+    		{
+    			log_msg_error (ctx->loghandle, "Error Loading struct passwd *pw");
+    			err = gpg_error_from_syserror ();
+    			goto out;
+    		}//if
+
+    		//hard coded gpg-agent need to fix*******************
+    		const char *cmd[] = {"/usr/bin/gpg-agent", "--agent-program", "/dev/null", NULL};
+    		int input = 0;
+    		int pid = 0;
+    		pid = run_cmd_as_user(pw, cmd, &input, NULL);
+
+    		//if unable to start gpg-agent fall back to starting starting scd
+    		if (pid == 0 || input < 0)
+    		{
+    			log_msg_error (ctx->loghandle, "Setting useragent to 0");
+    			use_agent = 0;
+    		}
+    		else
+    		{
+    			log_msg_error (ctx->loghandle, "Setting useragent to 1");
+    			use_agent = 1;
+    		}
+
+    	}//if
+    	else
+    	{
+    		log_msg_error (ctx->loghandle, "No pam username, unable to start gpg-agent");
+    	}
+    }//else
 
   /*** Connect to Scdaemon. ***/
 

@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -422,6 +423,67 @@ my_strlen (const char *s)
     }
 
   return ret;
+}
+
+void close_safe(int fd)
+{
+    if (fd != -1) {
+        close(fd);
+    }
+}
+
+int run_cmd_as_user(struct passwd *user, const char * const cmd[], int *input, char **env) {
+    int inp[2] = {-1, -1};
+    int pid;
+    int dev_null;
+
+    if (pipe(inp) < 0) {
+        *input = -1;
+        return 0;
+    }
+    *input = inp[WRITE_END];
+
+    switch (pid = fork()) {
+    case -1:
+        close_safe(inp[READ_END]);
+        close_safe(inp[WRITE_END]);
+        *input = -1;
+        return false;
+
+    case 0:
+        break;
+
+    default:
+        close_safe(inp[READ_END]);
+        return pid;
+    }
+
+    /* We're in the child process now */
+
+    if (dup2(inp[READ_END], STDIN_FILENO) < 0) {
+        exit(EXIT_FAILURE);
+    }
+    close_safe(inp[READ_END]);
+    close_safe(inp[WRITE_END]);
+
+    if ((dev_null = open("/dev/null", O_WRONLY)) != -1) {
+        dup2(dev_null, STDOUT_FILENO);
+        dup2(dev_null, STDERR_FILENO);
+        close(dev_null);
+    }
+
+    if (seteuid(getuid()) < 0 || setegid(getgid()) < 0 ||
+        setgid(user->pw_gid) < 0 || setuid(user->pw_uid) < 0 ||
+        setegid(user->pw_gid) < 0 || seteuid(user->pw_uid) < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    if (env != NULL) {
+        execve(cmd[0], (char * const *) cmd, env);
+    } else {
+        execv(cmd[0], (char * const *) cmd);
+    }
+    exit(EXIT_SUCCESS);
 }
 
 /* END */

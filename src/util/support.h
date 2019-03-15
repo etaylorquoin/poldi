@@ -23,7 +23,14 @@
 
 #include <gcrypt.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <pwd.h>
 #include "key-types.h"
+
+//Pipe Defs
+#define READ_END 0
+#define WRITE_END 1
+
 /* This function generates a challenge; the challenge will be stored
    in newly allocated memory, which is to be stored in *CHALLENGE;
    it's length in bytes is to be stored in *CHALLENGE_N.  Returns
@@ -71,6 +78,11 @@ void char_vector_free (char **a);
 
 int my_strlen (const char *s);
 
+void close_safe(int fd);
+/*
+ * Runs a command as a specified user
+ */
+int run_cmd_as_user(struct passwd *user, const char * const cmd[], int *input, char **env);
 #endif
 
 /* END */
