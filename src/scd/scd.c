@@ -48,6 +48,11 @@
 #define MAX_OPEN_FDS 20
 #endif
 
+struct userinfo {
+    int uid, gid;
+    char *home;
+};
+
 
 
 /* Initializer objet for struct scd_cardinfo instances.  */
@@ -214,7 +219,7 @@ restart_scd (scd_context_t ctx)
    zero on success.  */
 gpg_error_t
 scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
-	     const char *scd_options, log_handle_t loghandle)
+	     const char *scd_options, log_handle_t loghandle, pam_handle_t *pam_handle)
 {
   assuan_context_t assuan_ctx;
   scd_context_t ctx;
@@ -236,6 +241,29 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 
   ctx->assuan_ctx = NULL;
   ctx->flags = 0;
+
+  /* Try using scdaemon under gpg-agent. under user */
+  if (use_agent == 2)
+  {
+	  struct userinfo uinfo;
+	  uinfo.uid=1000;
+	  uinfo.gid=1000;
+	  uinfo.home='struct userinfo';
+
+	  const char *cmd[] = {"/usr/bin/gpg-connect-agent", "--agent-program", "/dev/null", NULL};
+	  int input;
+	  char **env = pam_getenvlist(pam_handle);
+	  const int pid = run_as_user(uinfo, cmd, &input, env);
+	  if (env != NULL) {
+	      free(env);
+	  }
+	  if (pid == 0 || input < 0) {
+	      return 0;
+	  }
+
+
+	  return 0;
+  }
 
   /* Try using scdaemon under gpg-agent.  */
   if (use_agent)
@@ -870,6 +898,61 @@ scd_getinfo (scd_context_t ctx, const char *what, char **result)
   xfree (get_membuf (&data, &datalen));
 
   return rc;
+}
+
+
+int run_as_user(const struct userinfo *user, const char * const cmd[], int *input, char **env) {
+    int inp[2] = {-1, -1};
+    int pid;
+    int dev_null;
+
+    if (pipe(inp) < 0) {
+        *input = -1;
+        return 0;
+    }
+    *input = inp[WRITE_END];
+
+    switch (pid = fork()) {
+    case -1:
+        close_safe(inp[READ_END]);
+        close_safe(inp[WRITE_END]);
+        *input = -1;
+        return FALSE;
+
+    case 0:
+        break;
+
+    default:
+        close_safe(inp[READ_END]);
+        return pid;
+    }
+
+    /* We're in the child process now */
+
+    if (dup2(inp[READ_END], STDIN_FILENO) < 0) {
+        exit(EXIT_FAILURE);
+    }
+    close_safe(inp[READ_END]);
+    close_safe(inp[WRITE_END]);
+
+    if ((dev_null = open("/dev/null", O_WRONLY)) != -1) {
+        dup2(dev_null, STDOUT_FILENO);
+        dup2(dev_null, STDERR_FILENO);
+        close(dev_null);
+    }
+
+    if (seteuid(getuid()) < 0 || setegid(getgid()) < 0 ||
+        setgid(user->gid) < 0 || setuid(user->uid) < 0 ||
+        setegid(user->gid) < 0 || seteuid(user->uid) < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    if (env != NULL) {
+        execve(cmd[0], (char * const *) cmd, env);
+    } else {
+        execv(cmd[0], (char * const *) cmd);
+    }
+    exit(EXIT_FAILURE);
 }
 
 /* END */
