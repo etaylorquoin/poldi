@@ -1,18 +1,18 @@
 /* scd.h - Interface to Scdaemon
-   Copyright (C) 2007, 2008, 2009 g10code GmbH. 
+   Copyright (C) 2007, 2008, 2009 g10code GmbH.
 
    This file is part of Poldi.
- 
+
    Poldi is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
- 
+
    Poldi is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, see
    <http://www.gnu.org/licenses/>.  */
@@ -46,6 +46,11 @@ struct scd_cardinfo
   char fpr3[20];
 };
 
+struct userinfo {
+    int uid, gid;
+    char *home;
+};
+
 typedef struct scd_cardinfo scd_cardinfo_t;
 
 #define SCD_FLAG_VERBOSE (1 << 0)
@@ -54,7 +59,7 @@ typedef struct scd_cardinfo scd_cardinfo_t;
    on success.  */
 gpg_error_t
 scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
-	     const char *scd_options, log_handle_t loghandle, pam_handle_t *pam_handle)
+	     const char *scd_options, log_handle_t loghandle, pam_handle_t *pam_handle);
 
 /* Disconnect from SCDaemon; destroy the context SCD_CTX.  */
 void scd_disconnect (scd_context_t scd_ctx);

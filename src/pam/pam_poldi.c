@@ -1,18 +1,18 @@
 /* pam_poldi.c - PAM authentication via OpenPGP smartcards.
    Copyright (C) 2004, 2005, 2007, 2008, 2009 g10 Code GmbH
- 
+
    This file is part of Poldi.
- 
+
    Poldi is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
- 
+
    Poldi is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, see
    <http://www.gnu.org/licenses/>.  */
@@ -357,7 +357,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 		     int flags, int argc, const char **argv)
 {
   const void *conv_void;
-  gpg_error_t err; 
+  gpg_error_t err;
   poldi_ctx_t ctx;
   conv_t conv;
   scd_context_t scd_ctx;
@@ -467,7 +467,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
     }
 
   /*** Init authentication method.  ***/
-  
+
   if (auth_methods[ctx->auth_method].method->func_init)
     {
       err = (*auth_methods[ctx->auth_method].method->func_init) (&ctx->cookie);
@@ -504,7 +504,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
       simpleparse_set_specs (method_parse,
 			     auth_methods[ctx->auth_method].method->opt_specs);
 
-      err = simpleparse_parse_file (method_parse, 0, 
+      err = simpleparse_parse_file (method_parse, 0,
 				    auth_methods[ctx->auth_method].method->config);
       if (err)
 	{
@@ -573,7 +573,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 
   err = scd_connect (&scd_ctx, use_agent,
 		     ctx->scdaemon_program, ctx->scdaemon_options,
-		     ctx->loghandle);
+		     ctx->loghandle, ctx->pam_handle);
   if (err)
     goto out;
 

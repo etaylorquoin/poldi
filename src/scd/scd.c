@@ -1,19 +1,19 @@
 /* scd.c - Interface to Scdaemon
    Copyright (C) 2001, 2002, 2005 Free Software Foundation, Inc.
-   Copyright (C) 2007, 2008, 2009 g10code GmbH. 
+   Copyright (C) 2007, 2008, 2009 g10code GmbH.
 
    This file is part of Poldi.
- 
+
    Poldi is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
- 
+
    Poldi is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, see
    <http://www.gnu.org/licenses/>.  */
@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 #include <gpg-error.h>
 #include <gcrypt.h>
@@ -48,12 +49,11 @@
 #define MAX_OPEN_FDS 20
 #endif
 
-struct userinfo {
-    int uid, gid;
-    char *home;
-};
+#define READ_END 0
+#define WRITE_END 1
 
-
+#define TRUE 1
+#define FALSE 0
 
 /* Initializer objet for struct scd_cardinfo instances.  */
 struct scd_cardinfo scd_cardinfo_null;
@@ -80,7 +80,7 @@ struct learn_parm_s
   void *sinfo_cb_arg;
 };
 
-struct inq_needpin_s 
+struct inq_needpin_s
 {
   scd_context_t ctx;
   int (*getpin_cb)(void *, const char *, char*, size_t);
@@ -248,12 +248,12 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  struct userinfo uinfo;
 	  uinfo.uid=1000;
 	  uinfo.gid=1000;
-	  uinfo.home='struct userinfo';
+	  uinfo.home="/home/eric";
 
 	  const char *cmd[] = {"/usr/bin/gpg-connect-agent", "--agent-program", "/dev/null", NULL};
 	  int input;
 	  char **env = pam_getenvlist(pam_handle);
-	  const int pid = run_as_user(uinfo, cmd, &input, env);
+	  const int pid = run_as_user(&uinfo, cmd, &input, env);
 	  if (env != NULL) {
 	      free(env);
 	  }
@@ -403,7 +403,7 @@ unescape_status_string (const char *s)
   while (*s)
     {
       if (*s == '%' && s[1] && s[2])
-        { 
+        {
           s++;
           *d = xtoi_2 (s);
           if (!*d)
@@ -419,7 +419,7 @@ unescape_status_string (const char *s)
       else
         *d++ = *s++;
     }
-  *d = 0; 
+  *d = 0;
   return buffer;
 }
 
@@ -518,7 +518,7 @@ learn_status_cb (void *opaque, const char *line)
       else if (no == 3)
         parm->fpr3valid = unhexify_fpr (line, parm->fpr3);
     }
-  
+
   return 0;
 }
 
@@ -633,7 +633,7 @@ membuf_data_cb (void *opaque, const void *buffer, size_t length)
     put_membuf (data, buffer, length);
   return 0;
 }
-  
+
 /* Handle the NEEDPIN inquiry. */
 static int
 inq_needpin (void *opaque, const char *line)
@@ -656,7 +656,7 @@ inq_needpin (void *opaque, const char *line)
       line += 7;
       while (*line == ' ')
         line++;
-      
+
       pinlen = 90;
       pin = xtrymalloc_secure (pinlen);
       if (!pin)
@@ -682,7 +682,7 @@ inq_needpin (void *opaque, const char *line)
       line += 17;
       while (*line == ' ')
         line++;
-      
+
       rc = parm->getpin_cb (parm->getpin_cb_arg, line, NULL, 1);
     }
   else if (!strncmp (line, "DISMISSPINPADPROMPT", 19)
@@ -788,7 +788,7 @@ scd_pksign (scd_context_t ctx,
     }
 
   memcpy (p, sigbuf, sigbuflen);
-  
+
  out:
 
   xfree (get_membuf (&data, &len));
@@ -844,7 +844,7 @@ scd_readkey (scd_context_t ctx,
  out:
 
   xfree (buffer);
-    
+
   return rc;
 }
 
