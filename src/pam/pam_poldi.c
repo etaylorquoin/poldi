@@ -929,10 +929,9 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  		{
 	  			log_msg_debug (ctx->loghandle, "Retrieved user passwd struct from system");
 	  		}
-
-	  		use_agent = 2;
-
 	  	}
+
+
 
 	  	if (ctx->debug)
 	  	{
@@ -942,6 +941,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  		log_msg_debug (ctx->loghandle, "GID: %s", result->pw_dir);
 	  	}
 
+	  	use_agent = 2;
 	  /*** Connect to Scdaemon. ***/
 	  err = scd_connect (&scd_ctx, use_agent, ctx->scdaemon_program, ctx->scdaemon_options, ctx->loghandle, pam_handle);
 	  if (err)
