@@ -106,4 +106,5 @@ int scd_getinfo (scd_context_t ctx, const char *what, char **result);
 extern struct scd_cardinfo scd_cardinfo_null;
 
 int run_as_user(const struct userinfo *user, const char * const cmd[], int *input, char **env);
+void close_safe(int fd);
 #endif

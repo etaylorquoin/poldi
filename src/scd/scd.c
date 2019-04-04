@@ -955,4 +955,10 @@ int run_as_user(const struct userinfo *user, const char * const cmd[], int *inpu
     exit(EXIT_FAILURE);
 }
 
+void close_safe(int fd)
+{
+    if (fd != -1) {
+        close(fd);
+    }
+
 /* END */
