@@ -927,7 +927,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  	{
 	  		if (ctx->debug)
 	  		{
-	  			(ctx->loghandle, "Retrieved user passwd struct from system");
+	  			log_msg_debug (ctx->loghandle, "Retrieved user passwd struct from system");
 	  		}
 
 	  		use_agent = 2;
