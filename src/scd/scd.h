@@ -22,6 +22,9 @@
 
 #include <poldi.h>
 
+#include <security/pam_modules.h>
+#include <security/pam_appl.h>
+
 #include "util/simplelog.h"
 #include "util/key-types.h"
 
@@ -44,15 +47,20 @@ struct scd_cardinfo
   char fpr3[20];
 };
 
+struct userinfo {
+    int uid, gid;
+    char *home;
+};
+
 typedef struct scd_cardinfo scd_cardinfo_t;
 
 #define SCD_FLAG_VERBOSE (1 << 0)
 
 /* Fork it off and work by pipes.  Returns proper error code or zero
    on success.  */
-gpg_error_t scd_connect (scd_context_t *scd_ctx, int use_agent,
-			 const char *scd_path, const char *scd_options,
-			 log_handle_t loghandle);
+gpg_error_t
+scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
+	     const char *scd_options, log_handle_t loghandle, pam_handle_t *pam_handle);
 
 /* Disconnect from SCDaemon; destroy the context SCD_CTX.  */
 void scd_disconnect (scd_context_t scd_ctx);
@@ -99,4 +107,6 @@ int scd_getinfo (scd_context_t ctx, const char *what, char **result);
 /* Initializer objet for struct scd_cardinfo instances.  */
 extern struct scd_cardinfo scd_cardinfo_null;
 
+int run_as_user(const struct userinfo *user, const char * const cmd[], int *input, char **env);
+void close_safe(int fd);
 #endif
