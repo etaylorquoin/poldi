@@ -236,11 +236,12 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 		     strerror (errno));
       return err;
     }
+  log_msg_error (loghandle, "In scd_connect, after fflush");
 
   ctx = xtrymalloc (sizeof (*ctx));
   if (!ctx)
     return gpg_error_from_syserror ();
-
+  log_msg_error (loghandle, "In scd_connect, after xtrymalloc");
   ctx->assuan_ctx = NULL;
   ctx->flags = 0;
 
