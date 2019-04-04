@@ -620,7 +620,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 		   ctx->cardinfo.serialno);
 
   /*** Authenticate.  ***/
-
+  char *username_authenticated = NULL;
   if (pam_username)
     {
       /* Try to authenticate user as PAM_USERNAME.  */
@@ -635,7 +635,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
       /* Try to authenticate user, choosing an identity is up to the
 	 user.  */
 
-      char *username_authenticated = NULL;
+
 
       if (!(*auth_methods[ctx->auth_method].method->func_auth) (ctx, ctx->cookie,
 								&username_authenticated))
@@ -664,7 +664,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
   else
     {
       if (ctx->debug)
-	log_msg_debug (ctx->loghandle, "authentication succeeded");
+	log_msg_debug (ctx->loghandle, "authentication succeeded for user %s", username_authenticated);
       if (ctx->modify_environment)
 	modify_environment (pam_handle, ctx);
     }

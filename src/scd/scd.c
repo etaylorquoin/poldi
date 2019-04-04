@@ -266,7 +266,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   }
 
   /* Try using scdaemon under gpg-agent.  */
-  if (use_agent)
+  if (use_agent == 1)
     {
       char *scd_socket_name = NULL;
 
@@ -289,7 +289,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   /* If scdaemon under gpg-agent is irrelevant or not available,
    * let Poldi invoke scdaemon.
    */
-  if (!use_agent || err)
+  if ((use_agent==0) || err)
     {
       const char *pgmname;
       const char *argv[5];
