@@ -225,7 +225,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   scd_context_t ctx;
   gpg_error_t err;
 
-  log_msg_error (loghandle, "In scd_connect");
+  log_msg_error (loghandle, "In scd_connect, user_agent=%d",use_agent);
 
   assuan_ctx = NULL;
 
@@ -244,23 +244,25 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   ctx->assuan_ctx = NULL;
   ctx->flags = 0;
 
+  log_msg_error (loghandle, "AT if user-agnet==2");
+
   /* Try using scdaemon under gpg-agent. under user */
   if (use_agent == 2)
   {
-	  log_msg_debug (loghandle, "In use_agent==2");
+	  log_msg_error (loghandle, "In use_agent==2");
 	  struct userinfo uinfo;
 	  uinfo.uid=1000;
 	  uinfo.gid=1000;
 	  uinfo.home="/home/eric";
-	  log_msg_debug (loghandle, "Def Vars");
+	  log_msg_error (loghandle, "Def Vars");
 
 	  const char *cmd[] = {"/usr/bin/gpg-connect-agent", "--agent-program", "/dev/null", NULL};
-	  log_msg_debug (loghandle, "Set command");
+	  log_msg_error (loghandle, "Set command");
 	  int input;
 	  char **env = pam_getenvlist(pam_handle);
-	  log_msg_debug (loghandle, "Call pam_getenvlist");
+	  log_msg_error (loghandle, "Call pam_getenvlist");
 	  const int pid = run_as_user(&uinfo, cmd, &input, env);
-	  log_msg_debug (loghandle, "Call run_as_user");
+	  log_msg_error (loghandle, "Call run_as_user");
 	  if (env != NULL) {
 	      free(env);
 	  }
