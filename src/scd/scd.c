@@ -960,5 +960,5 @@ void close_safe(int fd)
     if (fd != -1) {
         close(fd);
     }
-
+}
 /* END */
