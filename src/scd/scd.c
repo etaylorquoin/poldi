@@ -257,8 +257,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  uinfo.home="/home/eric";
 	  log_msg_error (loghandle, "Def Vars");
 
-	  //start gpg-agent and scdaemon
-	  const char *cmd[] = {"gpg-connect-agent learn /bye"};
+	  const char *cmd[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
 	  log_msg_error (loghandle, "Set command");
 	  int input;
 	  char **env = pam_getenvlist(pam_handle);
