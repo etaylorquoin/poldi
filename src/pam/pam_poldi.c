@@ -785,14 +785,14 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  	 {
 	  		  if (tok != NULL)
 	  	  	  {
-	  	  	   	  log_msg_error (loghandle, "In Session Toke If");
-	  	          log_msg_error (loghandle, "Session: tok: %s", tok);
+	  	  	   	  log_msg_error (ctx->loghandle, "In Session Toke If");
+	  	          log_msg_error (ctx->loghandle, "Session: tok: %s", tok);
 	  	      }
 
 	  	 }
 	  	  else
 	  	  {
-	  		  log_msg_error (loghandle, "Session: Unable to get AUTHTOK");
+	  		  log_msg_error (ctx->loghandle, "Session: Unable to get AUTHTOK");
 	  	  }
 	  	  /*** Basic initialization. ***/
 //	  /* Authentication method to use must be specified.  */
