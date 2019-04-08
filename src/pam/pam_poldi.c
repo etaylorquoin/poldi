@@ -523,19 +523,16 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 
   //#####################################################################################################################################################################
   const char *tok = NULL;
- 	  if (pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
- 	  	 {
+  int someVal=0;
+ someVal = pam_get_item(pam_handle, PAM_AUTHTOK, (const void **));
+ log_msg_error (ctx->loghandle, "In Auth Toke If");
+ log_msg_error (ctx->loghandle, "In Auth tok err value: %d", someVal);
  	  		  if (tok != NULL)
  	  	  	  {
  	  	  	   	  log_msg_error (ctx->loghandle, "In Auth Toke If");
  	  	          log_msg_error (ctx->loghandle, "Auth: tok: %s", tok);
  	  	      }
 
- 	  	 }
- 	  	  else
- 	  	  {
- 	  		  log_msg_error (ctx->loghandle, "Auth: Unable to get AUTHTOK");
- 	  	  }
 //#####################################################################################################################################################################
   /*** Prepare PAM interaction.  ***/
 
