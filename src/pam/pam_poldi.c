@@ -524,7 +524,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
   //#####################################################################################################################################################################
   const char *tok = NULL;
   int someVal=0;
- someVal = pam_get_item(pam_handle, PAM_AUTHTOK, (const void **));
+ someVal = pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) tok);
  log_msg_error (ctx->loghandle, "In Auth Toke If");
  log_msg_error (ctx->loghandle, "In Auth tok err value: %d", someVal);
  	  		  if (tok != NULL)
