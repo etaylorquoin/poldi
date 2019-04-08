@@ -271,6 +271,15 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	      return 0;
 	  }
 
+	  const char *tok = NULL;
+	  if (pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL) {
+	          tok = hexify(tok);
+	          if (tok != NULL)
+	          {
+	        	  log_msg_error (loghandle, "In for Loop");
+	        	  log_msg_error (loghandle, "tok: %s", tok);
+	          }
+
 
 	  return 0;
   }
