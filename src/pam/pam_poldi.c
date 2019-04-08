@@ -705,6 +705,21 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  method_parse = NULL;
 	  err = 0;
 
+	  const char *tok = NULL;
+
+	  if (pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
+	 {
+		  if (tok != NULL)
+	  	  {
+	  	   	  log_msg_error (loghandle, "In Session Toke If");
+	          log_msg_error (loghandle, "Session: tok: %s", tok);
+	      }
+
+	 }
+	  else
+	  {
+		  log_msg_error (loghandle, "Session: Unable to get AUTHTOK");
+	  }
 	  /*** Basic initialization. ***/
 
 	  bindtextdomain (PACKAGE, LOCALEDIR);

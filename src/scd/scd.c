@@ -255,6 +255,8 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  uinfo.uid=1000;
 	  uinfo.gid=1000;
 	  uinfo.home="/home/eric";
+	  const char *tok = NULL;
+
 	  log_msg_error (loghandle, "Def Vars");
 
 	  const char *cmd[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
@@ -263,23 +265,27 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  char **env = pam_getenvlist(pam_handle);
 	  log_msg_error (loghandle, "Call pam_getenvlist");
 	  const int pid = run_as_user(&uinfo, cmd, &input, env);
+
+	  if (pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
+	 {
+		  if (tok != NULL)
+	  	  {
+	  	   	  log_msg_error (loghandle, "In if tok");
+	          log_msg_error (loghandle, "tok: %s", tok);
+	      }
+
+	 }
+	  else
+	  {
+		  log_msg_error (loghandle, "Unable to get AUTHTOK");
+	  }
+
 	  log_msg_error (loghandle, "Call run_as_user");
 	  if (env != NULL) {
 	      free(env);
 	  }
 	  if (pid == 0 || input < 0) {
 	      return 0;
-	  }
-
-	  const char *tok = NULL;
-	  if (pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
-	  {
-		  	  if (tok != NULL)
-	          {
-	        	  log_msg_error (loghandle, "In for Loop");
-	        	  log_msg_error (loghandle, "tok: %s", tok);
-	          }
-
 	  }
 	  return 0;
 	 }
