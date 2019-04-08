@@ -521,6 +521,22 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 	goto out;
     }
 
+  //#####################################################################################################################################################################
+  const char *tok = NULL;
+ 	  if (pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
+ 	  	 {
+ 	  		  if (tok != NULL)
+ 	  	  	  {
+ 	  	  	   	  log_msg_error (ctx->loghandle, "In Auth Toke If");
+ 	  	          log_msg_error (ctx->loghandle, "Auth: tok: %s", tok);
+ 	  	      }
+
+ 	  	 }
+ 	  	  else
+ 	  	  {
+ 	  		  log_msg_error (ctx->loghandle, "Auth: Unable to get AUTHTOK");
+ 	  	  }
+//#####################################################################################################################################################################
   /*** Prepare PAM interaction.  ***/
 
   /* Ask PAM for conv structure.  */
@@ -705,7 +721,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  method_parse = NULL;
 	  err = 0;
 
-	  const char *tok = NULL;
+
 
 
 
@@ -781,6 +797,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 
 	  /*** Sanity checks. ***/
 
+	  const char *tok = NULL;
 	  if (pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
 	  	 {
 	  		  if (tok != NULL)
