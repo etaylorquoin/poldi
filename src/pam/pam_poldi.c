@@ -524,7 +524,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
   //#####################################################################################################################################################################
   const char *tok = NULL;
   int someVal=0;
- someVal = pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) tok);
+ someVal = pam_get_item(ctx->pam_handle, PAM_AUTHTOK, (const void **) tok);
  log_msg_error (ctx->loghandle, "In Auth Toke If");
  log_msg_error (ctx->loghandle, "In Auth tok err value: %d", someVal);
  	  		  if (tok != NULL)
@@ -532,7 +532,11 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
  	  	  	   	  log_msg_error (ctx->loghandle, "In Auth Toke If");
  	  	          log_msg_error (ctx->loghandle, "Auth: tok: %s", tok);
  	  	      }
-
+ 	  /*		PAM_BAD_ITEM;
+ 	  		PAM_BUF_ERR;
+ 	  		PAM_PERM_DENIED;
+ 	  		PAM_SUCCESS;
+ 	  		PAM_SYSTEM_ERR;*/
 //#####################################################################################################################################################################
   /*** Prepare PAM interaction.  ***/
 
@@ -795,7 +799,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  /*** Sanity checks. ***/
 
 	  const char *tok = NULL;
-	  if (pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
+	  if (pam_get_item(ctx->pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
 	  	 {
 	  		  if (tok != NULL)
 	  	  	  {
