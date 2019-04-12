@@ -29,9 +29,10 @@
 #include <pwd.h>
 #include <assert.h>
 
+#define PAM_SM_ACCOUNT
 #define PAM_SM_AUTH
+#define PAM_SM_PASSWORD
 #define PAM_SM_SESSION
-
 #include <security/pam_modules.h>
 #include <security/pam_appl.h>
 
