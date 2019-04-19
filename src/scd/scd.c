@@ -287,7 +287,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  }
 	  else
 	  {
-		  waitpid(child);
+		  waitpid(child, NULL, 0);
 	  }
 	return 0;
   }
