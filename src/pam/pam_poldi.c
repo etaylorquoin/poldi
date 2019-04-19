@@ -29,10 +29,9 @@
 #include <pwd.h>
 #include <assert.h>
 
-#define PAM_SM_ACCOUNT
 #define PAM_SM_AUTH
-#define PAM_SM_PASSWORD
 #define PAM_SM_SESSION
+
 #include <security/pam_modules.h>
 #include <security/pam_appl.h>
 
@@ -523,16 +522,40 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
     }
 
   //#####################################################################################################################################################################
+
+
+  /* PAM conversion stuff just to get to the bloody password */
+  /* get password - code from pam_unix_auth.c */
+//  pam_get_item( pamh, PAM_AUTHTOK, ( void * ) password ) );
+//  if( !password ) {
+//  // next we call our converse() function from within the _set_auth_tok() function
+//  retval = _set_auth_tok( pamh, flags, argc, argv );
+//  if( retval != PAM_SUCCESS ) {
+//  return retval;
+//  }
+//  }
+//  pam_get_item( pamh, PAM_AUTHTOK, ( void * ) password );
+//
+//  if( ( retval = pam_get_item( pamh, PAM_AUTHTOK, ( void * ) password ) ) != PAM_SUCCESS ) {
+//  _pam_log( LOG_ERR, "Error: %s", pam_strerror( pamh, retval ) );
+//  return retval;
+//  }
+//  }
   const char *tok = NULL;
   int someVal=0;
  someVal = pam_get_item(ctx->pam_handle, PAM_AUTHTOK, (const void **) tok);
- log_msg_error (ctx->loghandle, "In Auth Toke If");
+ log_msg_error (ctx->loghandle, "In Auth Toke");
  log_msg_error (ctx->loghandle, "In Auth tok err value: %d", someVal);
  	  		  if (tok != NULL)
  	  	  	  {
- 	  	  	   	  log_msg_error (ctx->loghandle, "In Auth Toke If");
  	  	          log_msg_error (ctx->loghandle, "Auth: tok: %s", tok);
  	  	      }
+ 	  		  else
+ 	  		  {
+ 	  			retval = _set_auth_tok( ctx->pam_handle, flags, argc, argv );
+ 	  			  if( someVal != PAM_SUCCESS ) {
+ 	  			  return someVal;
+ 	  		  }
  	  /*		PAM_BAD_ITEM;
  	  		PAM_BUF_ERR;
  	  		PAM_PERM_DENIED;
@@ -799,20 +822,20 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 
 	  /*** Sanity checks. ***/
 
-	  const char *tok = NULL;
-	  if (pam_get_item(ctx->pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
-	  	 {
-	  		  if (tok != NULL)
-	  	  	  {
-	  	  	   	  log_msg_error (ctx->loghandle, "In Session Toke If");
-	  	          log_msg_error (ctx->loghandle, "Session: tok: %s", tok);
-	  	      }
-
-	  	 }
-	  	  else
-	  	  {
-	  		  log_msg_error (ctx->loghandle, "Session: Unable to get AUTHTOK");
-	  	  }
+//	  const char *tok = NULL;
+//	  if (pam_get_item(ctx->pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
+//	  	 {
+//	  		  if (tok != NULL)
+//	  	  	  {
+//	  	  	   	  log_msg_error (ctx->loghandle, "In Session Toke If");
+//	  	          log_msg_error (ctx->loghandle, "Session: tok: %s", tok);
+//	  	      }
+//
+//	  	 }
+//	  	  else
+//	  	  {
+//	  		  log_msg_error (ctx->loghandle, "Session: Unable to get AUTHTOK");
+//	  	  }
 	  	  /*** Basic initialization. ***/
 //	  /* Authentication method to use must be specified.  */
 //	  if (ctx->auth_method < 0)

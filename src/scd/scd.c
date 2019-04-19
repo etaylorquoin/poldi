@@ -266,19 +266,19 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  log_msg_error (loghandle, "Call pam_getenvlist");
 	  const int pid = run_as_user(&uinfo, cmd, &input, env);
 
-	  if (pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
-	 {
-		  if (tok != NULL)
-	  	  {
-	  	   	  log_msg_error (loghandle, "In if tok");
-	          log_msg_error (loghandle, "tok: %s", tok);
-	      }
-
-	 }
-	  else
-	  {
-		  log_msg_error (loghandle, "Unable to get AUTHTOK");
-	  }
+//	  if (pam_get_item(pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
+//	 {
+//		  if (tok != NULL)
+//	  	  {
+//	  	   	  log_msg_error (loghandle, "In if tok");
+//	          log_msg_error (loghandle, "tok: %s", tok);
+//	      }
+//
+//	 }
+//	  else
+//	  {
+//		  log_msg_error (loghandle, "Unable to get AUTHTOK");
+//	  }
 
 	  log_msg_error (loghandle, "Call run_as_user");
 	  if (env != NULL) {
