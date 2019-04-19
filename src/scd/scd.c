@@ -323,6 +323,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	        	return 1;
 	        }
 
+	 err = 0;
   }
 
   /* Try using scdaemon under gpg-agent.  */
