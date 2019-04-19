@@ -228,11 +228,6 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 
   log_msg_error (loghandle, "In scd_connect, user_agent=%d",use_agent);
 
-  const char *tok = NULL;
-  tok = "ThisIsMyTestPassword";
-   pam_set_data(pam_handle, "pam-gnupg-scd", (void *) tok, cleanup_token);
-  assuan_ctx = NULL;
-
   if (fflush (NULL))
     {
       err = gpg_error_from_syserror ();
@@ -324,6 +319,11 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
       const char *argv[5];
       int no_close_list[3];
       int i;
+
+      const char *tok = NULL;
+      tok = "ThisIsMyTestPassword";
+      pam_set_data(pam_handle, "pam-gnupg-scd", (void *) tok, cleanup_token);
+      assuan_ctx = NULL;
 
       if (!scd_path || !*scd_path)
         scd_path = GNUPG_DEFAULT_SCD;
