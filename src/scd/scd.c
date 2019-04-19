@@ -272,12 +272,23 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  if (pid == 0 || input < 0) {
 	      return 0;
 	  }
+
+	  int child = fork();
+	  if( child = 0 )
+	  {
 	  setgid(1000);
 	  setuid(1000);
 	  err = get_agent_socket_name (&gpg_agent_sockname);
 	  err = get_scd_socket_from_agent(&scd_socketname);
 	  log_msg_error (loghandle, "GPG Socket: %s", gpg_agent_sockname);
 	  log_msg_error (loghandle, "SCD Socket: %s", gpg_agent_sockname);
+	  exit(0);
+
+	  }
+	  else
+	  {
+		  waitpid(child);
+	  }
 	return 0;
   }
 
