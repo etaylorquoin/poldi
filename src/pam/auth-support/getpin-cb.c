@@ -91,7 +91,7 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 
   //#########################################################################################################
   char const *sendPinBuff;
-  sendPinBuff = malloc(strlen(buffer) + 1);
+  sendPinBuff = xtrymalloc(strlen(buffer) + 1);
 
   strncpy (sendPinBuff, buffer, strlen(sendPinBuff));
   pam_set_data(ctx->pam_handle, "poldi-scd", (void *) buffer, cleanup_token);
