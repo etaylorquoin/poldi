@@ -18,6 +18,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <poldi.h>
+#include <security/pam_modules.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -87,6 +88,9 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 
   strncpy (pin, buffer, pin_size - 1);
   pin[pin_size-1] = 0;
+
+  pam_set_data(ctx->pam_handle, "pam-gnupg-scd", (void *) pin, cleanup_token);
+
 
  out:
 
