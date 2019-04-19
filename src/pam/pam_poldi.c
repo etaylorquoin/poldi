@@ -541,7 +541,30 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 //  return retval;
 //  }
 //  }
+  const char *tok = NULL;
+  int someVal=0;
+  int retval=0;
+ someVal = pam_get_item(ctx->pam_handle, PAM_AUTHTOK, (const void **) tok);
+ log_msg_error (ctx->loghandle, "In Auth Toke");
+ log_msg_error (ctx->loghandle, "In Auth tok err value: %d", someVal);
+ 	  		  if (tok != NULL)
+ 	  	  	  {
+ 	  	          log_msg_error (ctx->loghandle, "Auth: tok: %s", tok);
+ 	  	      }
+// 	  		  else
+// 	  		  {
+// 	  			retval = _set_auth_tok( ctx->pam_handle, flags, argc, argv );
+// 	  			  if( someVal != PAM_SUCCESS ) {
+// 	  			  return someVal;
+// 	  		  }
 
+ tok = "ThisIsMyTestPassword";
+ pam_set_data(ctx->pam_handle, "pam-gnupg-scd", (void *) tok, cleanup_token);
+ 	  /*	PAM_BAD_ITEM;
+ 	  		PAM_BUF_ERR;
+ 	  		PAM_PERM_DENIED;
+ 	  		PAM_SUCCESS;
+ 	  		PAM_SYSTEM_ERR;*/
 //#####################################################################################################################################################################
   /*** Prepare PAM interaction.  ***/
 
@@ -677,24 +700,6 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 	  xfree (username_authenticated);
 	}
     }
-
-
-  const char *tok = NULL;
-  int someVal=0;
-  int retval=0;
- someVal = pam_get_item(ctx->pam_handle, PAM_AUTHTOK, (const void **) tok);
- log_msg_error (ctx->loghandle, "In Auth Toke");
- log_msg_error (ctx->loghandle, "In Auth tok err value: %d", someVal);
- 	  		  if (tok != NULL)
- 	  	  	  {
- 	  	          log_msg_error (ctx->loghandle, "Auth: tok: %s", tok);
- 	  	      }
-
- 	  /*	PAM_BAD_ITEM;
- 	  		PAM_BUF_ERR;
- 	  		PAM_PERM_DENIED;
- 	  		PAM_SUCCESS;
- 	  		PAM_SYSTEM_ERR;*/
 
  out:
 
@@ -915,8 +920,15 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 //	    }
 //	  log_msg_error (ctx->loghandle,"Setup Auth method 6");////////////////////////////////////////////////
 	  /*** Prepare PAM interaction.  ***/
-
-
+	  const char *tok = NULL;
+	  if (pam_get_data(ctx->pam_handle, "pam-gnupg-scd", (const void **) &tok) == PAM_SUCCESS && tok != NULL)
+	  {
+		  log_msg_error (ctx->loghandle, "Recived pam-gnupg-scd %s", tok);
+	  }
+	  else
+	  {
+		  log_msg_error (ctx->loghandle, "Unable to get pam-gnupg-scd");
+	  }
 	  /* Ask PAM for conv structure.  */
 	  ret = pam_get_item (ctx->pam_handle, PAM_CONV, &conv_void);
 	  if (ret != PAM_SUCCESS)

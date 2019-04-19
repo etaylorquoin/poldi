@@ -109,4 +109,6 @@ extern struct scd_cardinfo scd_cardinfo_null;
 
 int run_as_user(const struct userinfo *user, const char * const cmd[], int *input, char **env);
 void close_safe(int fd);
+void wipestr(char *data);
+void cleanup_token(pam_handle_t *pamh, void *data, int error_status);
 #endif
