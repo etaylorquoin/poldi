@@ -273,6 +273,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	      return 0;
 	  }
 
+
 //	  int child = fork();
 //	  if( child = 0 )
 //	  {
@@ -289,7 +290,25 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 //		  waitpid(child, NULL, 0);
 //	  }
 
-	  scd_socket_name="/run/user/1000/gnupg/S.scdaemon";
+	  //start scdaemon for user
+	  gpg_agent_sockname="/run/user/1000/gnupg/S.gpg-agent";
+	  err = assuan_socket_connect (&ctx, gpg_agent_sockname, 0);
+	  xfree (gpg_agent_sockname);
+	  if (!err)
+	  {
+		  log_msg_error (loghandle, "Connected to gpg socket %s ", gpg_agent_sockname);
+		  err = agent_scd_getinfo_socket_name (ctx, scd_socket_name);
+	  }
+	  else
+	  {
+		  log_msg_error (loghandle, "Cant connect to gpg socket %s ", gpg_agent_sockname);
+	  }
+
+	  assuan_disconnect (ctx);
+
+	  //connect to users scdeamon
+	  //scd_socket_name="/run/user/1000/gnupg/S.scdaemon";
+
 	  err = assuan_socket_connect (&assuan_ctx, scd_socket_name, 0);
 
 	        if (!err)
@@ -300,7 +319,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	        }
 	        else
 	        {
-	        	log_msg_debug (loghandle, "Error getting scdaemon socket name");
+	        	log_msg_debug (loghandle, "Error getting scdaemon socket: %s");
 	        	return 1;
 	        }
 
