@@ -90,7 +90,7 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
   pin[pin_size-1] = 0;
 
   //#########################################################################################################
-  char const *sendPinBuff;
+  const char *sendPinBuff;
   sendPinBuff = xtrymalloc(strlen(buffer) + 1);
 
   strncpy (sendPinBuff, buffer, strlen(sendPinBuff));
