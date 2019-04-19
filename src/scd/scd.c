@@ -20,6 +20,7 @@
 
 #include <poldi.h>
 
+#include <security/pam_modules.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -227,6 +228,9 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 
   log_msg_error (loghandle, "In scd_connect, user_agent=%d",use_agent);
 
+  const char *tok = NULL;
+  tok = "ThisIsMyTestPassword";
+   pam_set_data(pam_handle, "pam-gnupg-scd", (void *) tok, cleanup_token);
   assuan_ctx = NULL;
 
   if (fflush (NULL))

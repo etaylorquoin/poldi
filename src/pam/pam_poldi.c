@@ -558,8 +558,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 // 	  			  return someVal;
 // 	  		  }
 
- tok = "ThisIsMyTestPassword";
- pam_set_data(ctx->pam_handle, "pam-gnupg-scd", (void *) tok, cleanup_token);
+
  	  /*	PAM_BAD_ITEM;
  	  		PAM_BUF_ERR;
  	  		PAM_PERM_DENIED;
