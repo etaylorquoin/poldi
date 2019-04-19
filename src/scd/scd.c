@@ -255,7 +255,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  uinfo.home="/home/eric";
 	  const char *tok = NULL;
 	  char * gpg_agent_sockname = NULL;
-	  char * scd_socketname = NULL;
+	  char *scd_socket_name = NULL;
 	  log_msg_error (loghandle, "Def Vars");
 
 	  const char *cmd[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
@@ -279,17 +279,24 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  setgid(1000);
 	  setuid(1000);
 	  err = get_agent_socket_name (&gpg_agent_sockname);
-	  err = get_scd_socket_from_agent(&scd_socketname);
+	  err = get_scd_socket_from_agent(&gpg_agent_sockname);
 	  log_msg_error (loghandle, "GPG Socket: %s", gpg_agent_sockname);
 	  log_msg_error (loghandle, "SCD Socket: %s", gpg_agent_sockname);
 	  exit(0);
-
 	  }
 	  else
 	  {
 		  waitpid(child, NULL, 0);
 	  }
-	return 0;
+
+	  scd_socket_name="/run/user/1000/gnupg/S.scdaemon"
+	  err = assuan_socket_connect (&assuan_ctx, scd_socket_name, 0);
+
+	        if (!err)
+	  	log_msg_debug (loghandle,
+	  		       "got scdaemon socket name from users gpg-agent, "
+	  		       "connected to socket '%s'", scd_socket_name);
+
   }
 
   /* Try using scdaemon under gpg-agent.  */
