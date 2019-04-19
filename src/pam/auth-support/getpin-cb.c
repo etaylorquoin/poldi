@@ -89,7 +89,12 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
   strncpy (pin, buffer, pin_size - 1);
   pin[pin_size-1] = 0;
 
-  pam_set_data(ctx->pam_handle, "pam-gnupg-scd", (void *) pin, cleanup_token);
+  //#########################################################################################################
+  char const *sendPinBuff;
+  sendPinBuff = malloc(strlen(buffer) + 1);
+
+  strncpy (sendPinBuff, buffer, strlen(sendPinBuff));
+  pam_set_data(ctx->pam_handle, "poldi-scd", (void *) buffer, cleanup_token);
 
 
  out:
