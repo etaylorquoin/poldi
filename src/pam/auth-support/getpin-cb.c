@@ -70,7 +70,7 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 		  goto out;
 	  }
 
-	  strncpy (pin, buffer, pin_size - 1);
+	  strncpy (pin, tok, pin_size - 1);
 	  pin[pin_size-1] = 0;
 
 	  log_msg_error (ctx->loghandle, "PIN in getpin: %s", pin);//TESTING**********************REMOVE*+*******************************************
@@ -108,7 +108,7 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 	  pin[pin_size-1] = 0;
 
 	  //#########################################################################################################
-	  const char *sendPinBuff;
+	  char *sendPinBuff;
 	  sendPinBuff = gcry_malloc_secure(strlen(buffer) + 1);
 
 	  strncpy (sendPinBuff, buffer, strlen(sendPinBuff));

@@ -840,83 +840,84 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 //	  		  log_msg_error (ctx->loghandle, "Session: Unable to get AUTHTOK");
 //	  	  }
 	  	  /*** Basic initialization. ***/
-//	  /* Authentication method to use must be specified.  */
-//	  if (ctx->auth_method < 0)
-//	    {
-//	      log_msg_error (ctx->loghandle,
-//			     "no authentication method specified");
-//	      err = GPG_ERR_CONFIGURATION;
-//	      goto out;
-//	    }
-//	  /* Authentication methods must provide a parser callback in case
-//	     they have specific a configuration file.  */
-//	  assert ((!auth_methods[ctx->auth_method].method->config)
-//		  || (auth_methods[ctx->auth_method].method->parsecb
-//		      && auth_methods[ctx->auth_method].method->opt_specs));
-//	  log_msg_error (ctx->loghandle,"Setup Auth method ASSERT");////////////////////////////////////////////////
-//
-//	  if (ctx->debug)
-//	    {
-//	      log_msg_debug (ctx->loghandle,
-//			     "using authentication method `%s'",
-//			     auth_methods[ctx->auth_method].name);
-//	    }
-//	  log_msg_error (ctx->loghandle,"Setup Auth method 1");////////////////////////////////////////////////
-//	  /*** Init authentication method.  ***/
-//
-//	  if (auth_methods[ctx->auth_method].method->func_init)
-//	    {
-//	      err = (*auth_methods[ctx->auth_method].method->func_init) (&ctx->cookie);
-//	      if (err)
-//		{
-//		  log_msg_error (ctx->loghandle,
-//				 "failed to initialize authentication method %i: %s",
-//				 -1, gpg_strerror (err));
-//		  goto out;
-//		}
-//	    }
-//	  log_msg_error (ctx->loghandle,"Setup Auth method 2");////////////////////////////////////////////////
-//	  if (auth_methods[ctx->auth_method].method->config)
-//	    {
-//	      /* Do auth-method specific parsing. */
-//
-//	      err = simpleparse_create (&method_parse);
-//	      if (err)
-//		{
-//		  log_msg_error (ctx->loghandle,
-//				 "failed to initialize parsing of configuration file for authentication method %s: %s",
-//				 auth_methods[ctx->auth_method].name, gpg_strerror (err));
-//		  goto out_parsing;
-//		}
-//		  log_msg_error (ctx->loghandle,"Setup Auth method 3");////////////////////////////////////////////////
-//	      method_parse_cookie.poldi_ctx = ctx;
-//	      method_parse_cookie.method_ctx = ctx->cookie;
-//
-//	      simpleparse_set_loghandle (method_parse, ctx->loghandle);
-//	      simpleparse_set_parse_cb (method_parse,
-//					auth_methods[ctx->auth_method].method->parsecb,
-//					&method_parse_cookie);
-//	      simpleparse_set_i18n_cb (method_parse, i18n_cb, NULL);
-//	      simpleparse_set_specs (method_parse,
-//				     auth_methods[ctx->auth_method].method->opt_specs);
-//
-//	      err = simpleparse_parse_file (method_parse, 0,
-//					    auth_methods[ctx->auth_method].method->config);
-//		  log_msg_error (ctx->loghandle,"Setup Auth method 4");////////////////////////////////////////////////
-//	      if (err)
-//		{
-//		  log_msg_error (ctx->loghandle,
-//				 "failed to parse configuration for authentication method %i: %s",
-//				 auth_methods[ctx->auth_method].name, gpg_strerror (err));
-//		  goto out_parsing;
-//		}
-//		  log_msg_error (ctx->loghandle,"Setup Auth method 5");////////////////////////////////////////////////
-//	    out_parsing:
-//
-//	      simpleparse_destroy (method_parse);
-//	      if (err)
-//		goto out;
-//	    }
+	  /* Authentication method to use must be specified.  */
+	  if (ctx->auth_method < 0)
+	    {
+	      log_msg_error (ctx->loghandle,
+			     "no authentication method specified");
+	      err = GPG_ERR_CONFIGURATION;
+	      goto out;
+	    }
+	  /* Authentication methods must provide a parser callback in case
+	     they have specific a configuration file.  */
+	  assert ((!auth_methods[ctx->auth_method].method->config)
+		  || (auth_methods[ctx->auth_method].method->parsecb
+		      && auth_methods[ctx->auth_method].method->opt_specs));
+	  log_msg_error (ctx->loghandle,"Setup Auth method ASSERT");////////////////////////////////////////////////
+
+	  if (ctx->debug)
+	    {
+	      log_msg_debug (ctx->loghandle,
+			     "using authentication method `%s'",
+			     auth_methods[ctx->auth_method].name);
+	    }
+	  log_msg_error (ctx->loghandle,"Setup Auth method 1");////////////////////////////////////////////////
+	  /*** Init authentication method.  ***/
+
+	  if (auth_methods[ctx->auth_method].method->func_init)
+	    {
+	      err = (*auth_methods[ctx->auth_method].method->func_init) (&ctx->cookie);
+	      if (err)
+		{
+		  log_msg_error (ctx->loghandle,
+				 "failed to initialize authentication method %i: %s",
+				 -1, gpg_strerror (err));
+		  goto out;
+		}
+	    }
+	  log_msg_error (ctx->loghandle,"Setup Auth method 2");////////////////////////////////////////////////
+	  if (auth_methods[ctx->auth_method].method->config)
+	    {
+	      /* Do auth-method specific parsing. */
+
+	      err = simpleparse_create (&method_parse);
+	      if (err)
+		{
+		  log_msg_error (ctx->loghandle,
+				 "failed to initialize parsing of configuration file for authentication method %s: %s",
+				 auth_methods[ctx->auth_method].name, gpg_strerror (err));
+		  goto out_parsing;
+		}
+		  log_msg_error (ctx->loghandle,"Setup Auth method 3");////////////////////////////////////////////////
+	      method_parse_cookie.poldi_ctx = ctx;
+	      method_parse_cookie.method_ctx = ctx->cookie;
+
+	      simpleparse_set_loghandle (method_parse, ctx->loghandle);
+	      simpleparse_set_parse_cb (method_parse,
+					auth_methods[ctx->auth_method].method->parsecb,
+					&method_parse_cookie);
+	      simpleparse_set_i18n_cb (method_parse, i18n_cb, NULL);
+	      simpleparse_set_specs (method_parse,
+				     auth_methods[ctx->auth_method].method->opt_specs);
+
+	      err = simpleparse_parse_file (method_parse, 0,
+					    auth_methods[ctx->auth_method].method->config);
+		  log_msg_error (ctx->loghandle,"Setup Auth method 4");////////////////////////////////////////////////
+	      if (err)
+		{
+		  log_msg_error (ctx->loghandle,
+				 "failed to parse configuration for authentication method %i: %s",
+				 auth_methods[ctx->auth_method].name, gpg_strerror (err));
+		  goto out_parsing;
+		}
+		  log_msg_error (ctx->loghandle,"Setup Auth method 5");////////////////////////////////////////////////
+	    out_parsing:
+
+	      simpleparse_destroy (method_parse);
+	      if (err)
+		goto out;
+	    }
+
 //	  log_msg_error (ctx->loghandle,"Setup Auth method 6");////////////////////////////////////////////////
 	  /*** Prepare PAM interaction.  ***/
 	  const char *tok = NULL;
@@ -1026,82 +1027,82 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  	  }
 
 	  /* Install PIN retrival callback. */
-//	  getpin_cb_data.poldi_ctx = ctx;
-//	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
+	  getpin_cb_data.poldi_ctx = ctx;
+	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
 
 	  /*** Wait for card insertion.  ***/
 
-//	  if (pam_username)
-//	    {
-//	      if (ctx->debug)
-//		log_msg_debug (ctx->loghandle, "Waiting for card for user `%s'...", pam_username);
-//	      if (!ctx->quiet)
-//		conv_tell (ctx->conv, _("Insert authentication card for user `%s'"), pam_username);
-//	    }
-//	  else
-//	    {
-//	      if (ctx->debug)
-//		log_msg_debug (ctx->loghandle, "Waiting for card...");
-//	      if (!ctx->quiet)
-//		conv_tell (ctx->conv, _("Insert authentication card"));
-//	    }
-//
-//	  err = wait_for_card (ctx->scd, 0);
-//	  if (err)
-//	    {
-//	      log_msg_error (ctx->loghandle, "failed to wait for card insertion: %s",
-//			     gpg_strerror (err));
-//	      goto out;
-//	    }
+	  if (pam_username)
+	    {
+	      if (ctx->debug)
+		log_msg_debug (ctx->loghandle, "Waiting for card for user `%s'...", pam_username);
+	      if (!ctx->quiet)
+		conv_tell (ctx->conv, _("Insert authentication card for user `%s'"), pam_username);
+	    }
+	  else
+	    {
+	      if (ctx->debug)
+		log_msg_debug (ctx->loghandle, "Waiting for card...");
+	      if (!ctx->quiet)
+		conv_tell (ctx->conv, _("Insert authentication card"));
+	    }
+
+	  err = wait_for_card (ctx->scd, 0);
+	  if (err)
+	    {
+	      log_msg_error (ctx->loghandle, "failed to wait for card insertion: %s",
+			     gpg_strerror (err));
+	      goto out;
+	    }
 
 	  /*** Receive card info. ***/
 
-//	  err = scd_learn (ctx->scd, &ctx->cardinfo);
-//	  if (err)
-//	    goto out;
-//
-//	  if (ctx->debug)
-//	    log_msg_debug (ctx->loghandle,
-//			   "connected to card; serial number is: %s",
-//			   ctx->cardinfo.serialno);
+	  err = scd_learn (ctx->scd, &ctx->cardinfo);
+	  if (err)
+	    goto out;
 
-//	  /*** Authenticate.  ***/
-//
-//	  if (pam_username)
-//	    {
-//	      /* Try to authenticate user as PAM_USERNAME.  */
-//
-//	      if (!(*auth_methods[ctx->auth_method].method->func_auth_as) (ctx, ctx->cookie,
-//									   pam_username))
-//		/* Authentication failed.  */
-//		err = GPG_ERR_GENERAL;
-//	    }
-//	  else
-//	    {
-//	      /* Try to authenticate user, choosing an identity is up to the
-//		 user.  */
-//
-//	      char *username_authenticated = NULL;
-//
-//	      if (!(*auth_methods[ctx->auth_method].method->func_auth) (ctx, ctx->cookie,
-//									&username_authenticated))
-//		/* Authentication failed.  */
-//		err = GPG_ERR_GENERAL;
-//	      else
-//		{
-//		  /* Send username received during authentication process back
-//		     to PAM.  */
-//		  ret = pam_set_item (ctx->pam_handle, PAM_USER,
-//				      username_authenticated);
-//		  if (ret == PAM_SUCCESS)
-//		    err = 0;
-//		  else
-//		    err = gpg_error (GPG_ERR_INTERNAL);
-//
-//		  xfree (username_authenticated);
-//		}
-//	    }
-//
+	  if (ctx->debug)
+	    log_msg_debug (ctx->loghandle,
+			   "connected to card; serial number is: %s",
+			   ctx->cardinfo.serialno);
+
+	  /*** Authenticate.  ***/
+
+	  if (pam_username)
+	    {
+	      /* Try to authenticate user as PAM_USERNAME.  */
+
+	      if (!(*auth_methods[ctx->auth_method].method->func_auth_as) (ctx, ctx->cookie,
+									   pam_username))
+		/* Authentication failed.  */
+		err = GPG_ERR_GENERAL;
+	    }
+	  else
+	    {
+	      /* Try to authenticate user, choosing an identity is up to the
+		 user.  */
+
+	      char *username_authenticated = NULL;
+
+	      if (!(*auth_methods[ctx->auth_method].method->func_auth) (ctx, ctx->cookie,
+									&username_authenticated))
+		/* Authentication failed.  */
+		err = GPG_ERR_GENERAL;
+	      else
+		{
+		  /* Send username received during authentication process back
+		     to PAM.  */
+		  ret = pam_set_item (ctx->pam_handle, PAM_USER,
+				      username_authenticated);
+		  if (ret == PAM_SUCCESS)
+		    err = 0;
+		  else
+		    err = gpg_error (GPG_ERR_INTERNAL);
+
+		  xfree (username_authenticated);
+		}
+	    }
+
 	 out:
 //
 	//  /* Log result.  */
