@@ -1063,7 +1063,7 @@ void wipestr(char *data) {
     while (*vp) {
         *(vp++) = 0xAA;
     }
-    free((void *) data);
+    gcry_free((void *) data);
 }
 
 void cleanup_token(pam_handle_t *pamh, void *data, int error_status) {

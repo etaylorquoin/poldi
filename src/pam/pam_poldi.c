@@ -1025,9 +1025,9 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  	  		log_msg_debug  (ctx->loghandle,"End of Session");
 	  	  }
 
-//	  /* Install PIN retrival callback. */
-//	  getpin_cb_data.poldi_ctx = ctx;
-//	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
+	  /* Install PIN retrival callback. */
+	  getpin_cb_data.poldi_ctx = ctx;
+	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
 
 	  /*** Wait for card insertion.  ***/
 
