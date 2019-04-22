@@ -59,43 +59,61 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
   buffer = NULL;
   rc = 0;
 
-  while (1)			/* Loop until well-formed PIN retrieved. */
-    {
-      /* Retrieve PIN through PAM.  */
-      rc = conv_ask (ctx->conv, 1, &buffer, info);
-      if (rc)
-	goto out;
+  //if pin is cached in pam use it
+  const char *tok = NULL;
+  if (pam_get_data(ctx->pam_handle, "poldi-scd", (const void **) &tok) == PAM_SUCCESS && tok != NULL)
+  {
+	  if (strlen (tok) >= pin_size)
+	  {
+		  log_msg_error (ctx->loghandle, "PIN too long for buffer!");
+		  rc = gpg_error (GPG_ERR_INV_DATA); /* ? */
+		  goto out;
+	  }
 
-      /* Do some basic checks on the entered PIN. FIXME: hard-coded
-	 values! Is this really the correct place for these checks?
-	 Shouldn't they be done in scdaemon itself?  -mo */
+	  strncpy (pin, buffer, pin_size - 1);
+	  pin[pin_size-1] = 0;
 
-      if (strlen (buffer) < 6)	/* FIXME? is it really minimum of 6 bytes? */
-	{
-	  log_msg_error (ctx->loghandle, "PIN too short");
-	  conv_tell (ctx->conv, "%s", _("PIN too short"));
-	}
-      else
-	break;
-    }
+	  log_msg_error (ctx->loghandle, "PIN in getpin: %s", pin);//TESTING**********************REMOVE*+*******************************************
+  }
+  else//request pin from user
+  {
+	  while (1)			/* Loop until well-formed PIN retrieved. */
+		{
+		  /* Retrieve PIN through PAM.  */
+		  rc = conv_ask (ctx->conv, 1, &buffer, info);
+		  if (rc)
+		goto out;
 
-  if (strlen (buffer) >= pin_size)
-    {
-      log_msg_error (ctx->loghandle, "PIN too long for buffer!");
-      rc = gpg_error (GPG_ERR_INV_DATA); /* ? */
-      goto out;
-    }
+		  /* Do some basic checks on the entered PIN. FIXME: hard-coded
+		 values! Is this really the correct place for these checks?
+		 Shouldn't they be done in scdaemon itself?  -mo */
 
-  strncpy (pin, buffer, pin_size - 1);
-  pin[pin_size-1] = 0;
+		  if (strlen (buffer) < 6)	/* FIXME? is it really minimum of 6 bytes? */
+		{
+		  log_msg_error (ctx->loghandle, "PIN too short");
+		  conv_tell (ctx->conv, "%s", _("PIN too short"));
+		}
+		  else
+		break;
+		}
 
-  //#########################################################################################################
-  const char *sendPinBuff;
-  sendPinBuff = gcry_malloc_secure(strlen(buffer) + 1);
+	  if (strlen (buffer) >= pin_size)
+		{
+		  log_msg_error (ctx->loghandle, "PIN too long for buffer!");
+		  rc = gpg_error (GPG_ERR_INV_DATA); /* ? */
+		  goto out;
+		}
 
-  strncpy (sendPinBuff, buffer, strlen(sendPinBuff));
-  pam_set_data(ctx->pam_handle, "poldi-scd", (void *) buffer, cleanup_token);
+	  strncpy (pin, buffer, pin_size - 1);
+	  pin[pin_size-1] = 0;
 
+	  //#########################################################################################################
+	  const char *sendPinBuff;
+	  sendPinBuff = gcry_malloc_secure(strlen(buffer) + 1);
+
+	  strncpy (sendPinBuff, buffer, strlen(sendPinBuff));
+	  pam_set_data(ctx->pam_handle, "poldi-scd", (void *) buffer, cleanup_token);
+  }
 
  out:
 
