@@ -312,6 +312,14 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 		  log_msg_error (loghandle, "Cant connect to gpg socket %s ", gpg_agent_sockname);
 	  }
 
+      if (fflush (NULL))
+           {
+             err = gpg_error_from_syserror ();
+             log_msg_error (loghandle, "error flushing pending output: %s",
+       		     strerror (errno));
+             return err;
+           }
+
 	  assuan_disconnect (ctx);
 
 	  //connect to users scdeamon
@@ -339,7 +347,9 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	         		     strerror (errno));
 	               return err;
 	             }
+	//testing******************************************************************************************
 	 err = 0;
+	 return err;
   }
 
   /* Try using scdaemon under gpg-agent.  */
