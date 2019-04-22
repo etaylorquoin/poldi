@@ -305,7 +305,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  if (!err)
 	  {
 		  log_msg_error (loghandle, "Connected to gpg socket %s ", gpg_agent_sockname);
-		  err = agent_scd_getinfo_socket_name (assuan_ctx, scd_socket_name);//***********************************ITS PROBABLY THIS********************************
+		  err = agent_scd_getinfo_socket_name (assuan_ctx, &scd_socket_name);//***********************************ITS PROBABLY THIS********************************
 	  }
 	  else
 	  {
@@ -321,21 +321,21 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
              return err;
            }
 
-	  assuan_disconnect (assuan_ctx);
-
-	  //connect to users scdeamon
-
-	  if (!err)
-	  {
-		  log_msg_debug (loghandle,
-		   "got scdaemon socket name from users gpg-agent, "
-	  		       "connected to socket '%s'", scd_socket_name);
-	  }
-	  else
-	  {
-		  log_msg_debug (loghandle, "Error getting scdaemon socket: %s");
-	      return 1;
-	  }
+//	  assuan_disconnect (assuan_ctx);
+//
+//	  //connect to users scdeamon
+//
+//	  if (!err)
+//	  {
+//		  log_msg_debug (loghandle,
+//		   "got scdaemon socket name from users gpg-agent, "
+//	  		       "connected to socket '%s'", scd_socket_name);
+//	  }
+//	  else
+//	  {
+//		  log_msg_debug (loghandle, "Error getting scdaemon socket: %s");
+//	      return 1;
+//	  }
 
 
 	        if (fflush (NULL))
