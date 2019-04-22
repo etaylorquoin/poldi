@@ -300,7 +300,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 
 	  //start scdaemon for user
 	  gpg_agent_sockname="/run/user/1000/gnupg/S.gpg-agent";
-	  err = assuan_socket_connect (&ctx, gpg_agent_sockname, 0);
+	  err = assuan_socket_connect (&assuan_ctx, gpg_agent_sockname, 0);
 	  //xfree (gpg_agent_sockname);
 	  if (!err)
 	  {
@@ -321,12 +321,9 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
              return err;
            }
 
-	  assuan_disconnect (ctx);
+	  assuan_disconnect (assuan_ctx);
 
 	  //connect to users scdeamon
-	  //scd_socket_name="/run/user/1000/gnupg/S.scdaemon";
-
-	  err = assuan_socket_connect (&assuan_ctx, scd_socket_name, 0);
 
 	  if (!err)
 	  {
