@@ -301,50 +301,50 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  //start scdaemon for user
 	  gpg_agent_sockname="/run/user/1000/gnupg/S.gpg-agent";
 	  err = assuan_socket_connect (&assuan_ctx, gpg_agent_sockname, 0);
-	  //xfree (gpg_agent_sockname);
-	  if (!err)
-	  {
-		  log_msg_error (loghandle, "Connected to gpg socket %s ", gpg_agent_sockname);
-		  err = agent_scd_getinfo_socket_name (ctx, scd_socket_name);
-	  }
-	  else
-	  {
-		  log_msg_error (loghandle, "Cant connect to gpg socket %s ", gpg_agent_sockname);
-		  return err;
-	  }
+//	  //xfree (gpg_agent_sockname);
+//	  if (!err)
+//	  {
+//		  log_msg_error (loghandle, "Connected to gpg socket %s ", gpg_agent_sockname);
+//		  err = agent_scd_getinfo_socket_name (ctx, scd_socket_name);
+//	  }
+//	  else
+//	  {
+//		  log_msg_error (loghandle, "Cant connect to gpg socket %s ", gpg_agent_sockname);
+//		  return err;
+//	  }
+//
+//      if (fflush (NULL))
+//           {
+//             err = gpg_error_from_syserror ();
+//             log_msg_error (loghandle, "error flushing pending output: %s",
+//       		     strerror (errno));
+//             return err;
+//           }
 
-      if (fflush (NULL))
-           {
-             err = gpg_error_from_syserror ();
-             log_msg_error (loghandle, "error flushing pending output: %s",
-       		     strerror (errno));
-             return err;
-           }
-
-	  assuan_disconnect (assuan_ctx);
-
-	  //connect to users scdeamon
-
-	  if (!err)
-	  {
-		  log_msg_debug (loghandle,
-		   "got scdaemon socket name from users gpg-agent, "
-	  		       "connected to socket '%s'", scd_socket_name);
-	  }
-	  else
-	  {
-		  log_msg_debug (loghandle, "Error getting scdaemon socket: %s");
-	      return 1;
-	  }
-
-
-	        if (fflush (NULL))
-	             {
-	               err = gpg_error_from_syserror ();
-	               log_msg_error (loghandle, "error flushing pending output: %s",
-	         		     strerror (errno));
-	               return err;
-	             }
+//	  assuan_disconnect (assuan_ctx);
+//
+//	  //connect to users scdeamon
+//
+//	  if (!err)
+//	  {
+//		  log_msg_debug (loghandle,
+//		   "got scdaemon socket name from users gpg-agent, "
+//	  		       "connected to socket '%s'", scd_socket_name);
+//	  }
+//	  else
+//	  {
+//		  log_msg_debug (loghandle, "Error getting scdaemon socket: %s");
+//	      return 1;
+//	  }
+//
+//
+//	        if (fflush (NULL))
+//	             {
+//	               err = gpg_error_from_syserror ();
+//	               log_msg_error (loghandle, "error flushing pending output: %s",
+//	         		     strerror (errno));
+//	               return err;
+//	             }
 	//testing******************************************************************************************
 	 err = 0;
 	 return err;
