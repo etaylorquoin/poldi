@@ -919,15 +919,15 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 //	    }
 //	  log_msg_error (ctx->loghandle,"Setup Auth method 6");////////////////////////////////////////////////
 	  /*** Prepare PAM interaction.  ***/
-//	  const char *tok = NULL;
-//	  if (pam_get_data(ctx->pam_handle, "poldi-scd", (const void **) &tok) == PAM_SUCCESS && tok != NULL)
-//	  {
-//		  log_msg_error (ctx->loghandle, "Recived pam-gnupg-scd %s", tok);
-//	  }
-//	  else
-//	  {
-//		  log_msg_error (ctx->loghandle, "Unable to get pam-gnupg-scd");
-//	  }
+	  const char *tok = NULL;
+	  if (pam_get_data(ctx->pam_handle, "poldi-scd", (const void **) &tok) == PAM_SUCCESS && tok != NULL)
+	  {
+		  log_msg_error (ctx->loghandle, "Recived pam-gnupg-scd %s", tok);
+	  }
+	  else
+	  {
+		  log_msg_error (ctx->loghandle, "Unable to get pam-gnupg-scd");
+	  }
 	  /* Ask PAM for conv structure.  */
 	  ret = pam_get_item (ctx->pam_handle, PAM_CONV, &conv_void);
 	  if (ret != PAM_SUCCESS)
@@ -1026,8 +1026,8 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  	  }
 
 	  /* Install PIN retrival callback. */
-	  getpin_cb_data.poldi_ctx = ctx;
-	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
+//	  getpin_cb_data.poldi_ctx = ctx;
+//	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
 
 	  /*** Wait for card insertion.  ***/
 
