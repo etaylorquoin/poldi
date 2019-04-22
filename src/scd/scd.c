@@ -419,8 +419,13 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
       /* FIXME: is this the best way?  -mo */
       //reset_scd (assuan_ctx);
 	  char *card_sn = NULL;
-      scd_serialno_internal (assuan_ctx, &card_sn);
+      err = scd_serialno_internal (assuan_ctx, &card_sn);
+      if(err)
+      {
+    	  log_msg_debug (loghandle, "Erroring Getting Serail Number: %s", gpg_strerror(err));
+      }
       log_msg_debug (loghandle, "SN: %s", card_sn);
+
       ctx->assuan_ctx = assuan_ctx;
       ctx->flags = 0;
       ctx->loghandle = loghandle;
