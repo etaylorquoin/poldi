@@ -248,6 +248,8 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 
   log_msg_error (loghandle, "AT if user-agnet==2");
 
+  if (use_agent == 2)
+    {
 	  struct userinfo uinfo;
 	  uinfo.uid=pw->pw_uid;
 	  uinfo.gid=pw->pw_gid;
