@@ -50,7 +50,7 @@ wait_for_card (scd_context_t ctx, unsigned int timeout)
       if (err == 0)
 	/* Card present!  */
 	break;
-      else if (gpg_err_code (err) == GPG_ERR_CARD_NOT_PRESENT)
+      else if (gpg_err_code (err) == GPG_ERR_CARD_NOT_PRESENT || gpg_err_code (err) == 275)
 
 	{
 	  /* Card not present.  */
