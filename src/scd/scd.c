@@ -293,6 +293,9 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  size_t maxBuffSize=1024;
 	  char pipe_buff[maxBuffSize];
 
+	  // create pipe descriptors
+	  	pipe(fd);
+
 	  if (fork() != 0)
 	  {
 		  //parent process reading only, close write descriptor
