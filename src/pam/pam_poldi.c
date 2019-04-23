@@ -1013,7 +1013,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 
 	  	use_agent = 2;
 	  /*** Connect to Scdaemon. ***/
-	  err = scd_connect (&scd_ctx, use_agent, ctx->scdaemon_program, ctx->scdaemon_options, ctx->loghandle, pam_handle);
+	  err = scd_connect (&scd_ctx, use_agent, ctx->scdaemon_program, ctx->scdaemon_options, ctx->loghandle, ctx->pam_handle);
 	  if (err)
 	  {
 	    goto out;

@@ -277,7 +277,6 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  //#####################################################################################################
 
 	  /*** Retrieve username from PAM.  ***/
-
 	err = pam_get_item (pam_handle, PAM_USER, (const void **)&pam_username);
 	if (err != PAM_SUCCESS)
 	{
