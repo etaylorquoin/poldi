@@ -289,9 +289,36 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 //	  {
 //		  waitpid(child, NULL, 0);
 //	  }
+	  int fd[2];
+	  size_t maxBuffSize=1024;
+	  char pipe_buff[maxBuffSize];
+
+	  if (fork() != 0)
+	  {
+		  //parent process reading only, close write descriptor
+		  close(fd[1]);
+
+		  //read data from child
+		  read(fd[0], pipe_buff, maxBuffSize);
+
+		  //close read
+		  close(fd[0]);
+	  }
+	  else//child process
+	  {
+		  //close read pipe
+		  close(fd[0]);
+		  strcpy(pipe_buff, "/run/user/1000/gnupg/S.gpg-agent");
+		  //get gpg socket path
+		  write(fd[1], pipe_buff, maxBuffSize);
+
+		  //close write
+		  close(fd[1]);
+		  exit(0);
+	  }
 
 	  //start scdaemon for user
-	  gpg_agent_sockname="/run/user/1000/gnupg/S.gpg-agent";//******NEED TO MAKE DYNAMIC*******************************************************************************
+	  gpg_agent_sockname=pipe_buff;
 	  err = assuan_socket_connect (&assuan_gpg_ctx, gpg_agent_sockname, 0);
 	  //xfree (gpg_agent_sockname);
 	  if (!err)
