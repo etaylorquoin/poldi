@@ -316,7 +316,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  assuan_disconnect (assuan_ctx);
 //
 	  //connect to users scdeamon socket
-	  err = assuan_socket_connect (&assuan_ctx, gpg_agent_sockname, 0);
+	  err = assuan_socket_connect (&assuan_ctx, scd_socket_name, 0);
 
 	  if (!err)
 	  {
