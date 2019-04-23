@@ -309,13 +309,15 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  }
 	  else//child process
 	  {
+		  close(fd[0]);
+
 		  //switch to user process
 		  setgid(uinfo.gid);
 		  setuid(uinfo.uid);
+		  get_scd_socket_from_agent (&scd_socket_name);
 
 		  //close read pipe
-		  close(fd[0]);
-		  strcpy(pipe_buff, "/run/user/1000/gnupg/S.gpg-agent");
+		  strcpy(pipe_buff, scd_socket_name);
 		  //get gpg socket path
 		  write(fd[1], pipe_buff, maxBuffSize);
 
