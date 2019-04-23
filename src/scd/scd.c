@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <pwd.h>
 
 #include <gpg-error.h>
 #include <gcrypt.h>
