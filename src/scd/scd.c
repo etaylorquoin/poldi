@@ -264,7 +264,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	struct passwd pwd, *result;
 	char *buf = NULL;
 	size_t bufsize;
-	const char *pam_username;
+	const char *pam_username = NULL;
 
 	//#####################################################################################################
 	  if (fflush (NULL))
@@ -282,6 +282,10 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	{
 	/* It's not fatal, username can be in the card.  */
 	log_msg_error (ctx->loghandle, "SCD Can't retrieve username from PAM");
+	}
+	else
+	{
+		log_msg_error (ctx->loghandle, "SCD retrieved username from PAM");
 	}
 	//#####################################################################################################
 	  if (fflush (NULL))
