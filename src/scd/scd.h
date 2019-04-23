@@ -60,7 +60,7 @@ typedef struct scd_cardinfo scd_cardinfo_t;
    on success.  */
 gpg_error_t
 scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
-	     const char *scd_options, log_handle_t loghandle, pam_handle_t *pam_handle);
+	     const char *scd_options, log_handle_t loghandle, pam_handle_t *pam_handle, struct passwd *pw);
 
 /* Disconnect from SCDaemon; destroy the context SCD_CTX.  */
 void scd_disconnect (scd_context_t scd_ctx);

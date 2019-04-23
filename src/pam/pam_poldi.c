@@ -594,8 +594,8 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
     }
 
   /*** Check if we use gpg-agent. ***/
+  struct passwd *pw;
   {
-    struct passwd *pw;
     pw = getpwuid (getuid ());
 
     if (pw == NULL)
@@ -617,7 +617,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 
   err = scd_connect (&scd_ctx, use_agent,
 		     ctx->scdaemon_program, ctx->scdaemon_options,
-		     ctx->loghandle, ctx->pam_handle);
+		     ctx->loghandle, ctx->pam_handle, pw);
   if (err)
     goto out;
 
@@ -983,37 +983,37 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	    }
 
 
-//	    //allocate and get users passwd strcut
-//	    buf = (char*) malloc(bufsize);
-//	  	ret = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
-//
-//	  	if(result == NULL || ret != 0)
-//	  	{
-//	  		free (buf);
-//	  		log_msg_error (ctx->loghandle, "Can't retrieve user passwd struct from system");
-//	  		goto out;
-//	  	}
-//	  	else
-//	  	{
-//	  		if (ctx->debug)
-//	  		{
-//	  			log_msg_debug (ctx->loghandle, "Retrieved user passwd struct from system");
-//	  		}
-//	  	}
-//
-//
-//
-//	  	if (ctx->debug)
-//	  	{
-//	  		log_msg_debug (ctx->loghandle, "User Name: `%s'", result->pw_name);
-//	  		log_msg_debug (ctx->loghandle, "UID: %u", result->pw_uid);
-//	  		log_msg_debug (ctx->loghandle, "GID: %u", result->pw_gid);
-//	  		log_msg_debug (ctx->loghandle, "GID: %s", result->pw_dir);
-//	  	}
+	    //allocate and get users passwd strcut
+	    buf = (char*) malloc(bufsize);
+	  	ret = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
+
+	  	if(result == NULL || ret != 0)
+	  	{
+	  		free (buf);
+	  		log_msg_error (ctx->loghandle, "Can't retrieve user passwd struct from system");
+	  		goto out;
+	  	}
+	  	else
+	  	{
+	  		if (ctx->debug)
+	  		{
+	  			log_msg_debug (ctx->loghandle, "Retrieved user passwd struct from system");
+	  		}
+	  	}
+
+
+
+	  	if (ctx->debug)
+	  	{
+	  		log_msg_debug (ctx->loghandle, "User Name: `%s'", result->pw_name);
+	  		log_msg_debug (ctx->loghandle, "UID: %u", result->pw_uid);
+	  		log_msg_debug (ctx->loghandle, "GID: %u", result->pw_gid);
+	  		log_msg_debug (ctx->loghandle, "GID: %s", result->pw_dir);
+	  	}
 
 	  	use_agent = 2;
 	  /*** Connect to Scdaemon. ***/
-	  err = scd_connect (&scd_ctx, use_agent, ctx->scdaemon_program, ctx->scdaemon_options, ctx->loghandle, ctx->pam_handle);
+	  err = scd_connect (&scd_ctx, use_agent, ctx->scdaemon_program, ctx->scdaemon_options, ctx->loghandle, ctx->pam_handle, result);
 	  if (err)
 	  {
 	    goto out;

@@ -221,7 +221,7 @@ restart_scd (scd_context_t ctx)
    zero on success.  */
 gpg_error_t
 scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
-	     const char *scd_options, log_handle_t loghandle, pam_handle_t *pam_handle)
+	     const char *scd_options, log_handle_t loghandle, pam_handle_t *pam_handle, struct passwd *pw)
 {
   assuan_context_t assuan_ctx;
   assuan_context_t assuan_gpg_ctx;
@@ -247,104 +247,11 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   ctx->flags = 0;
 
   log_msg_error (loghandle, "AT if user-agnet==2");
-//#####################################################################################################
-  if (fflush (NULL))
-      {
-        err = gpg_error_from_syserror ();
-        log_msg_error (loghandle, "error flushing pending output: %s",
-  		     strerror (errno));
-        return err;
-      }
-  //#####################################################################################################
 
-  /* Try using scdaemon under gpg-agent. under user */
-  if (use_agent == 2)
-  {
-	log_msg_error (loghandle, "In use_agent==2");
-	struct passwd pwd, *result;
-	char *buf = NULL;
-	size_t bufsize;
-	const char *pam_username = NULL;
-
-	//#####################################################################################################
-	  if (fflush (NULL))
-	      {
-	        err = gpg_error_from_syserror ();
-	        log_msg_error (loghandle, "error flushing pending output: %s",
-	  		     strerror (errno));
-	        return err;
-	      }
-	  //#####################################################################################################
-
-	  /*** Retrieve username from PAM.  ***/
-	err = pam_get_item (pam_handle, PAM_USER, (const void **)&pam_username);
-	if (err != PAM_SUCCESS)
-	{
-	/* It's not fatal, username can be in the card.  */
-	log_msg_error (ctx->loghandle, "SCD Can't retrieve username from PAM");
-	}
-	else
-	{
-		log_msg_error (ctx->loghandle, "SCD retrieved username from PAM");
-	}
-	//#####################################################################################################
-	  if (fflush (NULL))
-	      {
-	        err = gpg_error_from_syserror ();
-	        log_msg_error (loghandle, "error flushing pending output: %s",
-	  		     strerror (errno));
-	        return err;
-	      }
-	  //#####################################################################################################
-
-	log_msg_debug  (ctx->loghandle, "SCD User Name: `%s'...", pam_username);
-	//#####################################################################################################
-	  if (fflush (NULL))
-	      {
-	        err = gpg_error_from_syserror ();
-	        log_msg_error (loghandle, "error flushing pending output: %s",
-	  		     strerror (errno));
-	        return err;
-	      }
-	  //#####################################################################################################
-	bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-	if (bufsize == -1)
-	{
-		bufsize = 16384;
-	}
-
-	  //allocate and get users passwd strcut
-	 buf = (char*) malloc(bufsize);
-	 err = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
-
-  	if(result == NULL || err != 0)
-  	{
-  		free (buf);
-  		log_msg_error (ctx->loghandle, "SCD Can't retrieve user passwd struct from system");
-  		return err;
-  	}
-  	else
-  	{
-  		log_msg_debug (ctx->loghandle, "SCD Retrieved user passwd struct from system");
-  	}
-
-  	log_msg_debug (ctx->loghandle, "SCD:User Name: `%s'", result->pw_name);
-  	log_msg_debug (ctx->loghandle, "SCD:UID: %u", result->pw_uid);
-  	log_msg_debug (ctx->loghandle, "SCD:GID: %u", result->pw_gid);
-  	log_msg_debug (ctx->loghandle, "SCD:GID: %s", result->pw_dir);
-  	//#####################################################################################################
-  	  if (fflush (NULL))
-  	      {
-  	        err = gpg_error_from_syserror ();
-  	        log_msg_error (loghandle, "error flushing pending output: %s",
-  	  		     strerror (errno));
-  	        return err;
-  	      }
-  	  //#####################################################################################################
 	  struct userinfo uinfo;
-	  uinfo.uid=result->pw_uid;
-	  uinfo.gid=result->pw_gid;
-	  uinfo.home=result->pw_dir;
+	  uinfo.uid=pw->pw_uid;
+	  uinfo.gid=pw->pw_gid;
+	  uinfo.home=pw->pw_dir;
 	  const char *tok = NULL;
 	  char * gpg_agent_sockname = NULL;
 	  char *scd_socket_name = NULL;
