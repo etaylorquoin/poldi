@@ -222,6 +222,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	     const char *scd_options, log_handle_t loghandle, pam_handle_t *pam_handle)
 {
   assuan_context_t assuan_ctx;
+  assuan_context_t assuan_gpg_ctx;
   scd_context_t ctx;
   gpg_error_t err;
 
@@ -300,12 +301,12 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 
 	  //start scdaemon for user
 	  gpg_agent_sockname="/run/user/1000/gnupg/S.gpg-agent";//******NEED TO MAKE DYNAMIC*******************************************************************************
-	  err = assuan_socket_connect (&assuan_ctx, gpg_agent_sockname, 0);
+	  err = assuan_socket_connect (&assuan_gpg_ctx, gpg_agent_sockname, 0);
 	  //xfree (gpg_agent_sockname);
 	  if (!err)
 	  {
 		  log_msg_error (loghandle, "Connected to gpg socket %s ", gpg_agent_sockname);
-		  err = agent_scd_getinfo_socket_name (assuan_ctx, &scd_socket_name);
+		  err = agent_scd_getinfo_socket_name (assuan_gpg_ctx, &scd_socket_name);
 	  }
 	  else
 	  {
@@ -313,7 +314,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  }
 
 	  //disconnect from gpg socket
-	  assuan_disconnect (assuan_ctx);
+	  assuan_disconnect (assuan_gpg_ctx);
 //
 	  //connect to users scdeamon socket
 	  err = assuan_socket_connect (&assuan_ctx, scd_socket_name, 0);
@@ -423,6 +424,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
       if(err)
       {
     	  log_msg_debug (loghandle, "Erroring Getting Serail Number: %s", gpg_strerror(err));
+    	  log_msg_debug (loghandle, "Erroring Getting Serail Number: %d", err);
       }
       log_msg_debug (loghandle, "SN: %s", card_sn);
 
