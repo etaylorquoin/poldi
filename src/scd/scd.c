@@ -257,11 +257,54 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   /* Try using scdaemon under gpg-agent. under user */
   if (use_agent == 2)
   {
-	  log_msg_error (loghandle, "In use_agent==2");
+	log_msg_error (loghandle, "In use_agent==2");
+	struct passwd pwd, *result;
+	char *buf = NULL;
+	size_t bufsize;
+	const char *pam_username;
+
+	  /*** Retrieve username from PAM.  ***/
+
+	err = pam_get_item (pam_handle, PAM_USER, (const void **)&pam_username);
+	if (err != PAM_SUCCESS)
+	{
+	/* It's not fatal, username can be in the card.  */
+	log_msg_error (ctx->loghandle, "Can't retrieve username from PAM");
+	}
+
+
+	log_msg_debug  (ctx->loghandle, "User Name: `%s'...", pam_username);
+
+	bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+	if (bufsize == -1)
+	{
+		bufsize = 16384;
+	}
+
+	  //allocate and get users passwd strcut
+	 buf = (char*) malloc(bufsize);
+	 err = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
+
+  	if(result == NULL || err != 0)
+  	{
+  		free (buf);
+  		log_msg_error (ctx->loghandle, "Can't retrieve user passwd struct from system");
+  		return err;
+  	}
+  	else
+  	{
+  		log_msg_debug (ctx->loghandle, "Retrieved user passwd struct from system");
+  	}
+
+  	log_msg_debug (ctx->loghandle, "SCD:User Name: `%s'", result->pw_name);
+  	log_msg_debug (ctx->loghandle, "SCD:UID: %u", result->pw_uid);
+  	log_msg_debug (ctx->loghandle, "SCD:GID: %u", result->pw_gid);
+  	log_msg_debug (ctx->loghandle, "SCD:GID: %s", result->pw_dir);
+
 	  struct userinfo uinfo;
-	  uinfo.uid=1000;
-	  uinfo.gid=1000;
-	  uinfo.home="/home/eric";
+	  uinfo.uid=result->pw_uid;
+	  uinfo.gid=result->pw_gid;
+	  uinfo.home=result->pw_dir;
 	  const char *tok = NULL;
 	  char * gpg_agent_sockname = NULL;
 	  char *scd_socket_name = NULL;

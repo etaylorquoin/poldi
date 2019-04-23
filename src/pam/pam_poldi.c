@@ -946,7 +946,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 
 	  ctx->conv = conv;
 
-	  /*** Retrieve username from PAM.  ***/
+//	  /*** Retrieve username from PAM.  ***/
 
 	  ret = pam_get_item (ctx->pam_handle, PAM_USER, (const void **)&pam_username);
 	  if (ret != PAM_SUCCESS)
@@ -983,33 +983,33 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	    }
 
 
-	    //allocate and get users passwd strcut
-	    buf = (char*) malloc(bufsize);
-	  	ret = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
-
-	  	if(result == NULL || ret != 0)
-	  	{
-	  		free (buf);
-	  		log_msg_error (ctx->loghandle, "Can't retrieve user passwd struct from system");
-	  		goto out;
-	  	}
-	  	else
-	  	{
-	  		if (ctx->debug)
-	  		{
-	  			log_msg_debug (ctx->loghandle, "Retrieved user passwd struct from system");
-	  		}
-	  	}
-
-
-
-	  	if (ctx->debug)
-	  	{
-	  		log_msg_debug (ctx->loghandle, "User Name: `%s'", result->pw_name);
-	  		log_msg_debug (ctx->loghandle, "UID: %u", result->pw_uid);
-	  		log_msg_debug (ctx->loghandle, "GID: %u", result->pw_gid);
-	  		log_msg_debug (ctx->loghandle, "GID: %s", result->pw_dir);
-	  	}
+//	    //allocate and get users passwd strcut
+//	    buf = (char*) malloc(bufsize);
+//	  	ret = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
+//
+//	  	if(result == NULL || ret != 0)
+//	  	{
+//	  		free (buf);
+//	  		log_msg_error (ctx->loghandle, "Can't retrieve user passwd struct from system");
+//	  		goto out;
+//	  	}
+//	  	else
+//	  	{
+//	  		if (ctx->debug)
+//	  		{
+//	  			log_msg_debug (ctx->loghandle, "Retrieved user passwd struct from system");
+//	  		}
+//	  	}
+//
+//
+//
+//	  	if (ctx->debug)
+//	  	{
+//	  		log_msg_debug (ctx->loghandle, "User Name: `%s'", result->pw_name);
+//	  		log_msg_debug (ctx->loghandle, "UID: %u", result->pw_uid);
+//	  		log_msg_debug (ctx->loghandle, "GID: %u", result->pw_gid);
+//	  		log_msg_debug (ctx->loghandle, "GID: %s", result->pw_dir);
+//	  	}
 
 	  	use_agent = 2;
 	  /*** Connect to Scdaemon. ***/
