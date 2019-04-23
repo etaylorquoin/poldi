@@ -19,6 +19,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <poldi.h>
+#include <security/pam_modules.h>
 
 #include <errno.h>
 #include <stdio.h>
@@ -246,7 +247,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   ctx->flags = 0;
 
   log_msg_error (loghandle, "AT if user-agnet==2");
-
+//#####################################################################################################
   if (fflush (NULL))
       {
         err = gpg_error_from_syserror ();
@@ -254,6 +255,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   		     strerror (errno));
         return err;
       }
+  //#####################################################################################################
 
   /* Try using scdaemon under gpg-agent. under user */
   if (use_agent == 2)
@@ -264,18 +266,44 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	size_t bufsize;
 	const char *pam_username;
 
+	//#####################################################################################################
+	  if (fflush (NULL))
+	      {
+	        err = gpg_error_from_syserror ();
+	        log_msg_error (loghandle, "error flushing pending output: %s",
+	  		     strerror (errno));
+	        return err;
+	      }
+	  //#####################################################################################################
+
 	  /*** Retrieve username from PAM.  ***/
 
 	err = pam_get_item (pam_handle, PAM_USER, (const void **)&pam_username);
 	if (err != PAM_SUCCESS)
 	{
 	/* It's not fatal, username can be in the card.  */
-	log_msg_error (ctx->loghandle, "Can't retrieve username from PAM");
+	log_msg_error (ctx->loghandle, "SCD Can't retrieve username from PAM");
 	}
+	//#####################################################################################################
+	  if (fflush (NULL))
+	      {
+	        err = gpg_error_from_syserror ();
+	        log_msg_error (loghandle, "error flushing pending output: %s",
+	  		     strerror (errno));
+	        return err;
+	      }
+	  //#####################################################################################################
 
-
-	log_msg_debug  (ctx->loghandle, "User Name: `%s'...", pam_username);
-
+	log_msg_debug  (ctx->loghandle, "SCD User Name: `%s'...", pam_username);
+	//#####################################################################################################
+	  if (fflush (NULL))
+	      {
+	        err = gpg_error_from_syserror ();
+	        log_msg_error (loghandle, "error flushing pending output: %s",
+	  		     strerror (errno));
+	        return err;
+	      }
+	  //#####################################################################################################
 	bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
 	if (bufsize == -1)
 	{
@@ -289,19 +317,27 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   	if(result == NULL || err != 0)
   	{
   		free (buf);
-  		log_msg_error (ctx->loghandle, "Can't retrieve user passwd struct from system");
+  		log_msg_error (ctx->loghandle, "SCD Can't retrieve user passwd struct from system");
   		return err;
   	}
   	else
   	{
-  		log_msg_debug (ctx->loghandle, "Retrieved user passwd struct from system");
+  		log_msg_debug (ctx->loghandle, "SCD Retrieved user passwd struct from system");
   	}
 
   	log_msg_debug (ctx->loghandle, "SCD:User Name: `%s'", result->pw_name);
   	log_msg_debug (ctx->loghandle, "SCD:UID: %u", result->pw_uid);
   	log_msg_debug (ctx->loghandle, "SCD:GID: %u", result->pw_gid);
   	log_msg_debug (ctx->loghandle, "SCD:GID: %s", result->pw_dir);
-
+  	//#####################################################################################################
+  	  if (fflush (NULL))
+  	      {
+  	        err = gpg_error_from_syserror ();
+  	        log_msg_error (loghandle, "error flushing pending output: %s",
+  	  		     strerror (errno));
+  	        return err;
+  	      }
+  	  //#####################################################################################################
 	  struct userinfo uinfo;
 	  uinfo.uid=result->pw_uid;
 	  uinfo.gid=result->pw_gid;
