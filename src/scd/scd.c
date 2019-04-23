@@ -327,21 +327,21 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  }
 
 	  //start scdaemon for user
-	  gpg_agent_sockname=pipe_buff;
-	  err = assuan_socket_connect (&assuan_gpg_ctx, gpg_agent_sockname, 0);
-	  //xfree (gpg_agent_sockname);
-	  if (!err)
-	  {
-		  log_msg_error (loghandle, "Connected to gpg socket %s ", gpg_agent_sockname);
-		  err = agent_scd_getinfo_socket_name (assuan_gpg_ctx, &scd_socket_name);
-	  }
-	  else
-	  {
-		  log_msg_error (loghandle, "Cant connect to gpg socket %s ", gpg_agent_sockname);
-	  }
-
-	  //disconnect from gpg socket
-	  assuan_disconnect (assuan_gpg_ctx);
+	  scd_socket_name=pipe_buff;
+//	  err = assuan_socket_connect (&assuan_gpg_ctx, gpg_agent_sockname, 0);
+//	  //xfree (gpg_agent_sockname);
+//	  if (!err)
+//	  {
+//		  log_msg_error (loghandle, "Connected to gpg socket %s ", gpg_agent_sockname);
+//		  err = agent_scd_getinfo_socket_name (assuan_gpg_ctx, &scd_socket_name);
+//	  }
+//	  else
+//	  {
+//		  log_msg_error (loghandle, "Cant connect to gpg socket %s ", gpg_agent_sockname);
+//	  }
+//
+//	  //disconnect from gpg socket
+//	  assuan_disconnect (assuan_gpg_ctx);
 //
 	  //connect to users scdeamon socket
 	  err = assuan_socket_connect (&assuan_ctx, scd_socket_name, 0);
