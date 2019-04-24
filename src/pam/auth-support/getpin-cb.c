@@ -33,9 +33,6 @@
 #include <dirent.h>
 #include <time.h>
 
-#include <sys/types.h>
-#include <keyutils.h>
-
 #include <gcrypt.h>
 
 #include "assuan.h"
@@ -116,8 +113,8 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 //	  strncpy (sendPinBuff, buffer, strlen(sendPinBuff));
 //	  pam_set_data(ctx->pam_handle, "poldi-scd", (void *) buffer, cleanup_token);
 
-	  //add key to kernel
-	  add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_SESSION_KEYRING);
+//	  //add key to kernel
+//	  add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_SESSION_KEYRING);
   }
 
  out:
