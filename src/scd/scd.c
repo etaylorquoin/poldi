@@ -300,10 +300,8 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  {
 		  //parent process reading only, close write descriptor
 		  close(fd[1]);
-
 		  //read data from child
 		  read(fd[0], pipe_buff, maxBuffSize);
-
 		  //close read
 		  close(fd[0]);
 	  }
@@ -321,7 +319,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 		  //get gpg socket path
 		  write(fd[1], pipe_buff, maxBuffSize);
 
-		  //close write
+		  //close write and exit
 		  close(fd[1]);
 		  exit(0);
 	  }

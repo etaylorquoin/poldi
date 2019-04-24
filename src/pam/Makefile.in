@@ -380,7 +380,8 @@ AM_CFLAGS = \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/util \
 	$(GPG_ERROR_CFLAGS) \
-	$(LIBGCRYPT_CFLAGS)
+	$(LIBGCRYPT_CFLAGS) \
+	-lkeyutils
 
 AUTH_METHODS = $(am__append_1) $(am__append_3)
 AUTH_METHODS_LIBS = $(am__append_2) $(am__append_4)
