@@ -938,13 +938,13 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_SESSION_KEYRING);
 
 	  //search for password and get keyid
-//	  key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_SESSION_KEYRING);
-//	  log_msg_error (ctx->loghandle, "Recived pam-poldi-key: %lx", sn);
-//
-//	  //get password
-//	  char *rtSecret;
-//	  long rt_val = keyctl_read_alloc(sn, (void **) &rtSecret);
-//	  log_msg_error (ctx->loghandle, "Recived pam-poldi-secret: %s", rtSecret);
+	  key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_SESSION_KEYRING);
+	  log_msg_error (ctx->loghandle, "Recived pam-poldi-key: %lx", sn);
+
+	  //get password
+	  char *rtSecret;
+	  long rt_val = keyctl_read_alloc(sn, (void **) &rtSecret);
+	  log_msg_error (ctx->loghandle, "Recived pam-poldi-secret: %s", rtSecret);
 
 	  /* Ask PAM for conv structure.  */
 	  ret = pam_get_item (ctx->pam_handle, PAM_CONV, &conv_void);
