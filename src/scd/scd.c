@@ -454,6 +454,14 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
     {
       /* FIXME: is this the best way?  -mo */
       //reset_scd (assuan_ctx);
+	  log_msg_debug (loghandle, "Getting SN");
+	  if (fflush (NULL))
+	 	      {
+	 	        err = gpg_error_from_syserror ();
+	 	        log_msg_error (loghandle, "error flushing pending output: %s",
+	 	  		     strerror (errno));
+	 	        return err;
+	 	      }
 	  char *card_sn = NULL;
       err = scd_serialno_internal (assuan_ctx, &card_sn);
       if(err)
@@ -462,7 +470,13 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
     	  log_msg_debug (loghandle, "Erroring Getting Serail Number: %d", err);
       }
       log_msg_debug (loghandle, "SN: %s", card_sn);
-
+      if (fflush (NULL))
+     	      {
+     	        err = gpg_error_from_syserror ();
+     	        log_msg_error (loghandle, "error flushing pending output: %s",
+     	  		     strerror (errno));
+     	        return err;
+     	      }
       ctx->assuan_ctx = assuan_ctx;
       ctx->flags = 0;
       ctx->loghandle = loghandle;
