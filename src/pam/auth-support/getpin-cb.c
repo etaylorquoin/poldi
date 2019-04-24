@@ -33,6 +33,9 @@
 #include <dirent.h>
 #include <time.h>
 
+#include <sys/types.h>
+#include <keyutils.h>
+
 #include <gcrypt.h>
 
 #include "assuan.h"
@@ -59,20 +62,24 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
   buffer = NULL;
   rc = 0;
 
-  //if pin is cached in pam use it
-  const char *tok = NULL;
-  if (pam_get_data(ctx->pam_handle, "poldi-scd", (const void **) &tok) == PAM_SUCCESS && tok != NULL)
+  //if pin is cached in kernel use it
+  key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_SESSION_KEYRING);
+
+  if (sn != -1)
   {
-	  if (strlen (tok) >= pin_size)
+	  char *rtSecret
+	  long rt_val = keyctl_read_alloc(sn, (void **) &rtSecret);
+	  if (strlen (rtSecret) >= pin_size)
 	  {
 		  log_msg_error (ctx->loghandle, "PIN too long for buffer!");
 		  rc = gpg_error (GPG_ERR_INV_DATA); /* ? */
 		  goto out;
 	  }
 
-	  strncpy (pin, tok, pin_size - 1);
+	  strncpy (pin, rtSecret, pin_size - 1);
 	  pin[pin_size-1] = 0;
 
+	  //overwrite and free ERASE rtSecret *******************************************************************************************************************************
 	  log_msg_error (ctx->loghandle, "PIN in getpin: %s", pin);//TESTING**********************REMOVE*+*******************************************
   }
   else//request pin from user
@@ -113,8 +120,8 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 //	  strncpy (sendPinBuff, buffer, strlen(sendPinBuff));
 //	  pam_set_data(ctx->pam_handle, "poldi-scd", (void *) buffer, cleanup_token);
 
-//	  //add key to kernel
-//	  add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_SESSION_KEYRING);
+	  //add key to kernel
+	  add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_SESSION_KEYRING);
   }
 
  out:
