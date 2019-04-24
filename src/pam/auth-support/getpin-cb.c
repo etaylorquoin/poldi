@@ -122,6 +122,8 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 
 	  //add key to kernel
 	  add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_SESSION_KEYRING);
+	  log_msg_error (ctx->loghandle, "SET PIN in kernel to: %s", buffer);//TESTING**********************REMOVE*+*******************************************
+
   }
 
  out:
