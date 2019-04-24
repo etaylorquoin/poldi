@@ -294,9 +294,10 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  char pipe_buff[maxBuffSize];
 
 	  // create pipe descriptors
-	  	pipe(fd);
+	  pipe(fd);
+	  int frk_val =fork();
 
-	  if (fork() != 0)
+	  if (frk_val != 0)
 	  {
 		  //parent process reading only, close write descriptor
 		  close(fd[1]);
@@ -323,7 +324,8 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 		  close(fd[1]);
 		  exit(0);
 	  }
-
+	  //wait for child to finish
+	  waitpid(frk_val, NULL, 0);
 	  //start scdaemon for user
 	  scd_socket_name=pipe_buff;
 //	  err = assuan_socket_connect (&assuan_gpg_ctx, gpg_agent_sockname, 0);
@@ -354,6 +356,14 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  {
 		  log_msg_debug (loghandle, "Error getting scdaemon socket: %s", scd_socket_name);
 	  }
+
+	  if (fflush (NULL))
+	      {
+	        err = gpg_error_from_syserror ();
+	        log_msg_error (loghandle, "error flushing pending output: %s",
+	  		     strerror (errno));
+	        return err;
+	      }
   }
 
   /* Try using scdaemon under gpg-agent.  */
@@ -380,7 +390,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   /* If scdaemon under gpg-agent is irrelevant or not available,
    * let Poldi invoke scdaemon.
    */
-  if ((use_agent==0) || err)
+  if ((use_agent==0) || (err && use_agent != 2))
     {
       const char *pgmname;
       const char *argv[5];
