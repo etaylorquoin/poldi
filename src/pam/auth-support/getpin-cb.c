@@ -67,7 +67,7 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 
   if (sn != -1)
   {
-	  char *rtSecret
+	  char *rtSecret;
 	  long rt_val = keyctl_read_alloc(sn, (void **) &rtSecret);
 	  if (strlen (rtSecret) >= pin_size)
 	  {
