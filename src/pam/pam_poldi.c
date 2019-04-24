@@ -939,7 +939,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 
 	  //get password
 	  char *rtSecret;
-	  long rt_val = keyctl_read(sn, &rtSecret);
+	  long rt_val = keyctl_read_alloc(sn, (void **) &rtSecret);
 	  log_msg_error (ctx->loghandle, "Recived pam-poldi-secret: %s", rtSecret);
 
 	  /* Ask PAM for conv structure.  */
