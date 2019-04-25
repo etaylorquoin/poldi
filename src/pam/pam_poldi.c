@@ -1051,147 +1051,147 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  		 	        return err;
 	  		 	      }
 
-	  /* Install PIN retrival callback. */
-	  getpin_cb_data.poldi_ctx = ctx;
-	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
-
-	  if (ctx->debug)
-	  	  	  {
-	  	  	  		log_msg_debug  (ctx->loghandle,"Set Pin call back");
-	  	  	  }
-//############################################################################################################
-	  	  	if (fflush (NULL))
-	  	  		 	      {
-	  	  		 	        err = gpg_error_from_syserror ();
-	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-	  	  		 	  		     strerror (errno));
-	  	  		 	        return err;
-	  	  		 	      }
-//############################################################################################################
-
-	  /*** Wait for card insertion.  ***/
-
-	  if (pam_username)
-	    {
-	      if (ctx->debug)
-		log_msg_debug (ctx->loghandle, "Waiting for card for user `%s'...", pam_username);
-	      if (!ctx->quiet)
-		conv_tell (ctx->conv, _("Insert authentication card for user `%s'"), pam_username);
-	      //############################################################################################################
-	      	  	  	if (fflush (NULL))
-	      	  	  		 	      {
-	      	  	  		 	        err = gpg_error_from_syserror ();
-	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-	      	  	  		 	  		     strerror (errno));
-	      	  	  		 	        return err;
-	      	  	  		 	      }
-	      //############################################################################################################
-	    }
-	  else
-	    {
-	      if (ctx->debug)
-		log_msg_debug (ctx->loghandle, "Waiting for card...");
-	      if (!ctx->quiet)
-		conv_tell (ctx->conv, _("Insert authentication card"));
-	      //############################################################################################################
-	      	  	  	if (fflush (NULL))
-	      	  	  		 	      {
-	      	  	  		 	        err = gpg_error_from_syserror ();
-	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-	      	  	  		 	  		     strerror (errno));
-	      	  	  		 	        return err;
-	      	  	  		 	      }
-	      //############################################################################################################
-	    }
-
-	  err = wait_for_card (ctx->scd, 0);
-	  if (err)
-	    {
-	      log_msg_error (ctx->loghandle, "failed to wait for card insertion: %s",
-			     gpg_strerror (err));
-	      //############################################################################################################
-	      	  	  	if (fflush (NULL))
-	      	  	  		 	      {
-	      	  	  		 	        err = gpg_error_from_syserror ();
-	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-	      	  	  		 	  		     strerror (errno));
-	      	  	  		 	        return err;
-	      	  	  		 	      }
-	      //############################################################################################################
-	      goto out;
-	    }
-	  log_msg_error (ctx->loghandle, "After afild to wait for card insertion");
-	  //############################################################################################################
-	  	  	  	if (fflush (NULL))
-	  	  	  		 	      {
-	  	  	  		 	        err = gpg_error_from_syserror ();
-	  	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-	  	  	  		 	  		     strerror (errno));
-	  	  	  		 	        return err;
-	  	  	  		 	      }
-	  //############################################################################################################
-
-	  if (fflush (NULL))
-	  	 	      {
-	  	 	        err = gpg_error_from_syserror ();
-	  	 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-	  	 	  		     strerror (errno));
-	  	 	        return err;
-	  	 	      }
-	  /*** Receive card info. ***/
-
-	  err = scd_learn (ctx->scd, &ctx->cardinfo);
-	  if (err)
-	    goto out;
-
-	  if (ctx->debug)
-	    log_msg_debug (ctx->loghandle,
-			   "connected to card; serial number is: %s",
-			   ctx->cardinfo.serialno);
-
-	  if (fflush (NULL))
-	  	 	      {
-	  	 	        err = gpg_error_from_syserror ();
-	  	 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-	  	 	  		     strerror (errno));
-	  	 	        return err;
-	  	 	      }
-	  /*** Authenticate.  ***/
-
-	  if (pam_username)
-	    {
-	      /* Try to authenticate user as PAM_USERNAME.  */
-
-	      if (!(*auth_methods[ctx->auth_method].method->func_auth_as) (ctx, ctx->cookie,
-									   pam_username))
-		/* Authentication failed.  */
-		err = GPG_ERR_GENERAL;
-	    }
-	  else
-	    {
-	      /* Try to authenticate user, choosing an identity is up to the
-		 user.  */
-
-	      char *username_authenticated = NULL;
-
-	      if (!(*auth_methods[ctx->auth_method].method->func_auth) (ctx, ctx->cookie,
-									&username_authenticated))
-		/* Authentication failed.  */
-		err = GPG_ERR_GENERAL;
-	      else
-		{
-		  /* Send username received during authentication process back
-		     to PAM.  */
-		  ret = pam_set_item (ctx->pam_handle, PAM_USER,
-				      username_authenticated);
-		  if (ret == PAM_SUCCESS)
-		    err = 0;
-		  else
-		    err = gpg_error (GPG_ERR_INTERNAL);
-
-		  xfree (username_authenticated);
-		}
-	    }
+//	  /* Install PIN retrival callback. */
+//	  getpin_cb_data.poldi_ctx = ctx;
+//	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
+//
+//	  if (ctx->debug)
+//	  	  	  {
+//	  	  	  		log_msg_debug  (ctx->loghandle,"Set Pin call back");
+//	  	  	  }
+////############################################################################################################
+//	  	  	if (fflush (NULL))
+//	  	  		 	      {
+//	  	  		 	        err = gpg_error_from_syserror ();
+//	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+//	  	  		 	  		     strerror (errno));
+//	  	  		 	        return err;
+//	  	  		 	      }
+////############################################################################################################
+//
+//	  /*** Wait for card insertion.  ***/
+//
+//	  if (pam_username)
+//	    {
+//	      if (ctx->debug)
+//		log_msg_debug (ctx->loghandle, "Waiting for card for user `%s'...", pam_username);
+//	      if (!ctx->quiet)
+//		conv_tell (ctx->conv, _("Insert authentication card for user `%s'"), pam_username);
+//	      //############################################################################################################
+//	      	  	  	if (fflush (NULL))
+//	      	  	  		 	      {
+//	      	  	  		 	        err = gpg_error_from_syserror ();
+//	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+//	      	  	  		 	  		     strerror (errno));
+//	      	  	  		 	        return err;
+//	      	  	  		 	      }
+//	      //############################################################################################################
+//	    }
+//	  else
+//	    {
+//	      if (ctx->debug)
+//		log_msg_debug (ctx->loghandle, "Waiting for card...");
+//	      if (!ctx->quiet)
+//		conv_tell (ctx->conv, _("Insert authentication card"));
+//	      //############################################################################################################
+//	      	  	  	if (fflush (NULL))
+//	      	  	  		 	      {
+//	      	  	  		 	        err = gpg_error_from_syserror ();
+//	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+//	      	  	  		 	  		     strerror (errno));
+//	      	  	  		 	        return err;
+//	      	  	  		 	      }
+//	      //############################################################################################################
+//	    }
+//
+//	  err = wait_for_card (ctx->scd, 0);
+//	  if (err)
+//	    {
+//	      log_msg_error (ctx->loghandle, "failed to wait for card insertion: %s",
+//			     gpg_strerror (err));
+//	      //############################################################################################################
+//	      	  	  	if (fflush (NULL))
+//	      	  	  		 	      {
+//	      	  	  		 	        err = gpg_error_from_syserror ();
+//	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+//	      	  	  		 	  		     strerror (errno));
+//	      	  	  		 	        return err;
+//	      	  	  		 	      }
+//	      //############################################################################################################
+//	      goto out;
+//	    }
+//	  log_msg_error (ctx->loghandle, "After afild to wait for card insertion");
+//	  //############################################################################################################
+//	  	  	  	if (fflush (NULL))
+//	  	  	  		 	      {
+//	  	  	  		 	        err = gpg_error_from_syserror ();
+//	  	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+//	  	  	  		 	  		     strerror (errno));
+//	  	  	  		 	        return err;
+//	  	  	  		 	      }
+//	  //############################################################################################################
+//
+//	  if (fflush (NULL))
+//	  	 	      {
+//	  	 	        err = gpg_error_from_syserror ();
+//	  	 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+//	  	 	  		     strerror (errno));
+//	  	 	        return err;
+//	  	 	      }
+//	  /*** Receive card info. ***/
+//
+//	  err = scd_learn (ctx->scd, &ctx->cardinfo);
+//	  if (err)
+//	    goto out;
+//
+//	  if (ctx->debug)
+//	    log_msg_debug (ctx->loghandle,
+//			   "connected to card; serial number is: %s",
+//			   ctx->cardinfo.serialno);
+//
+//	  if (fflush (NULL))
+//	  	 	      {
+//	  	 	        err = gpg_error_from_syserror ();
+//	  	 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+//	  	 	  		     strerror (errno));
+//	  	 	        return err;
+//	  	 	      }
+//	  /*** Authenticate.  ***/
+//
+//	  if (pam_username)
+//	    {
+//	      /* Try to authenticate user as PAM_USERNAME.  */
+//
+//	      if (!(*auth_methods[ctx->auth_method].method->func_auth_as) (ctx, ctx->cookie,
+//									   pam_username))
+//		/* Authentication failed.  */
+//		err = GPG_ERR_GENERAL;
+//	    }
+//	  else
+//	    {
+//	      /* Try to authenticate user, choosing an identity is up to the
+//		 user.  */
+//
+//	      char *username_authenticated = NULL;
+//
+//	      if (!(*auth_methods[ctx->auth_method].method->func_auth) (ctx, ctx->cookie,
+//									&username_authenticated))
+//		/* Authentication failed.  */
+//		err = GPG_ERR_GENERAL;
+//	      else
+//		{
+//		  /* Send username received during authentication process back
+//		     to PAM.  */
+//		  ret = pam_set_item (ctx->pam_handle, PAM_USER,
+//				      username_authenticated);
+//		  if (ret == PAM_SUCCESS)
+//		    err = 0;
+//		  else
+//		    err = gpg_error (GPG_ERR_INTERNAL);
+//
+//		  xfree (username_authenticated);
+//		}
+//	    }
 
 	 out:
 //
