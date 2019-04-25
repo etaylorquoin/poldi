@@ -81,6 +81,9 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 
 	  //overwrite and free ERASE rtSecret *******************************************************************************************************************************
 	  log_msg_error (ctx->loghandle, "PIN in getpin: %s", pin);//TESTING**********************REMOVE*+*******************************************
+
+	  //revoke key
+	  rt_val = keyctl_revoke(sn);
   }
   else//request pin from user
   {
