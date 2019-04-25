@@ -1055,6 +1055,19 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  getpin_cb_data.poldi_ctx = ctx;
 	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
 
+	  if (ctx->debug)
+	  	  	  {
+	  	  	  		log_msg_debug  (ctx->loghandle,"Set Pin call back");
+	  	  	  }
+
+	  	  	if (fflush (NULL))
+	  	  		 	      {
+	  	  		 	        err = gpg_error_from_syserror ();
+	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	  	  		 	  		     strerror (errno));
+	  	  		 	        return err;
+	  	  		 	      }
+
 	  /*** Wait for card insertion.  ***/
 
 	  if (pam_username)
