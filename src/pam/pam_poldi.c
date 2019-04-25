@@ -1043,6 +1043,14 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  	  		log_msg_debug  (ctx->loghandle,"End of Session");
 	  	  }
 
+	  	if (fflush (NULL))
+	  		 	      {
+	  		 	        err = gpg_error_from_syserror ();
+	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	  		 	  		     strerror (errno));
+	  		 	        return err;
+	  		 	      }
+
 	  /* Install PIN retrival callback. */
 	  getpin_cb_data.poldi_ctx = ctx;
 	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
@@ -1072,6 +1080,13 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	      goto out;
 	    }
 
+	  if (fflush (NULL))
+	  	 	      {
+	  	 	        err = gpg_error_from_syserror ();
+	  	 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	  	 	  		     strerror (errno));
+	  	 	        return err;
+	  	 	      }
 	  /*** Receive card info. ***/
 
 	  err = scd_learn (ctx->scd, &ctx->cardinfo);
@@ -1083,6 +1098,13 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 			   "connected to card; serial number is: %s",
 			   ctx->cardinfo.serialno);
 
+	  if (fflush (NULL))
+	  	 	      {
+	  	 	        err = gpg_error_from_syserror ();
+	  	 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	  	 	  		     strerror (errno));
+	  	 	        return err;
+	  	 	      }
 	  /*** Authenticate.  ***/
 
 	  if (pam_username)
