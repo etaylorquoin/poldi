@@ -1059,7 +1059,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  	  	  {
 	  	  	  		log_msg_debug  (ctx->loghandle,"Set Pin call back");
 	  	  	  }
-
+//############################################################################################################
 	  	  	if (fflush (NULL))
 	  	  		 	      {
 	  	  		 	        err = gpg_error_from_syserror ();
@@ -1067,6 +1067,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  	  		 	  		     strerror (errno));
 	  	  		 	        return err;
 	  	  		 	      }
+//############################################################################################################
 
 	  /*** Wait for card insertion.  ***/
 
@@ -1076,6 +1077,15 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 		log_msg_debug (ctx->loghandle, "Waiting for card for user `%s'...", pam_username);
 	      if (!ctx->quiet)
 		conv_tell (ctx->conv, _("Insert authentication card for user `%s'"), pam_username);
+	      //############################################################################################################
+	      	  	  	if (fflush (NULL))
+	      	  	  		 	      {
+	      	  	  		 	        err = gpg_error_from_syserror ();
+	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	      	  	  		 	  		     strerror (errno));
+	      	  	  		 	        return err;
+	      	  	  		 	      }
+	      //############################################################################################################
 	    }
 	  else
 	    {
@@ -1083,6 +1093,15 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 		log_msg_debug (ctx->loghandle, "Waiting for card...");
 	      if (!ctx->quiet)
 		conv_tell (ctx->conv, _("Insert authentication card"));
+	      //############################################################################################################
+	      	  	  	if (fflush (NULL))
+	      	  	  		 	      {
+	      	  	  		 	        err = gpg_error_from_syserror ();
+	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	      	  	  		 	  		     strerror (errno));
+	      	  	  		 	        return err;
+	      	  	  		 	      }
+	      //############################################################################################################
 	    }
 
 	  err = wait_for_card (ctx->scd, 0);
@@ -1090,8 +1109,27 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	    {
 	      log_msg_error (ctx->loghandle, "failed to wait for card insertion: %s",
 			     gpg_strerror (err));
+	      //############################################################################################################
+	      	  	  	if (fflush (NULL))
+	      	  	  		 	      {
+	      	  	  		 	        err = gpg_error_from_syserror ();
+	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	      	  	  		 	  		     strerror (errno));
+	      	  	  		 	        return err;
+	      	  	  		 	      }
+	      //############################################################################################################
 	      goto out;
 	    }
+	  log_msg_error (ctx->loghandle, "After afild to wait for card insertion");
+	  //############################################################################################################
+	  	  	  	if (fflush (NULL))
+	  	  	  		 	      {
+	  	  	  		 	        err = gpg_error_from_syserror ();
+	  	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	  	  	  		 	  		     strerror (errno));
+	  	  	  		 	        return err;
+	  	  	  		 	      }
+	  //############################################################################################################
 
 	  if (fflush (NULL))
 	  	 	      {
