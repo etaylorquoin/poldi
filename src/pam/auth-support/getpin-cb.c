@@ -143,6 +143,10 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 	  {
 		  log_msg_error (ctx->loghandle, "Error setting pin in keyutils: %lx", rt_val);
 	  }
+	  else
+	  {
+		  log_msg_error (ctx->loghandle, "Added pin in keyutils: %lx", rt_val);
+	  }
 
 	  log_msg_error (ctx->loghandle, "SET PIN in kernel to: %s", buffer);//TESTING**********************REMOVE*+*******************************************
 
