@@ -945,16 +945,16 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 //	  char *rtSecret;
 //	  long rt_val = keyctl_read_alloc(sn, (void **) &rtSecret);
 //	  log_msg_error (ctx->loghandle, "Recived pam-poldi-secret: %s", rtSecret);
-//
-//	  /* Ask PAM for conv structure.  */
-//	  ret = pam_get_item (ctx->pam_handle, PAM_CONV, &conv_void);
-//	  if (ret != PAM_SUCCESS)
-//	    {
-//	      log_msg_error (ctx->loghandle,
-//			     "failed to retrieve PAM conversation structure");
-//	      err = GPG_ERR_INTERNAL;
-//	      goto out;
-//	    }
+
+	  /* Ask PAM for conv structure.  */
+	  ret = pam_get_item (ctx->pam_handle, PAM_CONV, &conv_void);
+	  if (ret != PAM_SUCCESS)
+	    {
+	      log_msg_error (ctx->loghandle,
+			     "failed to retrieve PAM conversation structure");
+	      err = GPG_ERR_INTERNAL;
+	      goto out;
+	    }
 
 	  /* Init conv subsystem by creating a conv_t object.  */
 	  err = conv_create (&conv, conv_void);
@@ -1104,94 +1104,94 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	      //############################################################################################################
 	    }
 
-//	  err = wait_for_card (ctx->scd, 0);
-//	  if (err)
-//	    {
-//	      log_msg_error (ctx->loghandle, "failed to wait for card insertion: %s",
-//			     gpg_strerror (err));
-//	      //############################################################################################################
-//	      	  	  	if (fflush (NULL))
-//	      	  	  		 	      {
-//	      	  	  		 	        err = gpg_error_from_syserror ();
-//	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-//	      	  	  		 	  		     strerror (errno));
-//	      	  	  		 	        return err;
-//	      	  	  		 	      }
-//	      //############################################################################################################
-//	      goto out;
-//	    }
-//	  log_msg_error (ctx->loghandle, "After afild to wait for card insertion");
-//	  //############################################################################################################
-//	  	  	  	if (fflush (NULL))
-//	  	  	  		 	      {
-//	  	  	  		 	        err = gpg_error_from_syserror ();
-//	  	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-//	  	  	  		 	  		     strerror (errno));
-//	  	  	  		 	        return err;
-//	  	  	  		 	      }
-//	  //############################################################################################################
-//
-//	  if (fflush (NULL))
-//	  	 	      {
-//	  	 	        err = gpg_error_from_syserror ();
-//	  	 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-//	  	 	  		     strerror (errno));
-//	  	 	        return err;
-//	  	 	      }
-//	  /*** Receive card info. ***/
-//
-//	  err = scd_learn (ctx->scd, &ctx->cardinfo);
-//	  if (err)
-//	    goto out;
-//
-//	  if (ctx->debug)
-//	    log_msg_debug (ctx->loghandle,
-//			   "connected to card; serial number is: %s",
-//			   ctx->cardinfo.serialno);
-//
-//	  if (fflush (NULL))
-//	  	 	      {
-//	  	 	        err = gpg_error_from_syserror ();
-//	  	 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-//	  	 	  		     strerror (errno));
-//	  	 	        return err;
-//	  	 	      }
-//	  /*** Authenticate.  ***/
-//
-//	  if (pam_username)
-//	    {
-//	      /* Try to authenticate user as PAM_USERNAME.  */
-//
-//	      if (!(*auth_methods[ctx->auth_method].method->func_auth_as) (ctx, ctx->cookie,
-//									   pam_username))
-//		/* Authentication failed.  */
-//		err = GPG_ERR_GENERAL;
-//	    }
-//	  else
-//	    {
-//	      /* Try to authenticate user, choosing an identity is up to the
-//		 user.  */
-//
-//	      char *username_authenticated = NULL;
-//
-//	      if (!(*auth_methods[ctx->auth_method].method->func_auth) (ctx, ctx->cookie,
-//									&username_authenticated))
-//		/* Authentication failed.  */
-//		err = GPG_ERR_GENERAL;
-//	      else
-//		{
-//		  /* Send username received during authentication process back
-//		     to PAM.  */
-//		  ret = pam_set_item (ctx->pam_handle, PAM_USER,
-//				      username_authenticated);
-//		  if (ret == PAM_SUCCESS)
-//		    err = 0;
-//		  else
-//		    err = gpg_error (GPG_ERR_INTERNAL);
-//
-//		  xfree (username_authenticated);
-//		}
-//	    }
+	  err = wait_for_card (ctx->scd, 0);
+	  if (err)
+	    {
+	      log_msg_error (ctx->loghandle, "failed to wait for card insertion: %s",
+			     gpg_strerror (err));
+	      //############################################################################################################
+	      	  	  	if (fflush (NULL))
+	      	  	  		 	      {
+	      	  	  		 	        err = gpg_error_from_syserror ();
+	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	      	  	  		 	  		     strerror (errno));
+	      	  	  		 	        return err;
+	      	  	  		 	      }
+	      //############################################################################################################
+	      goto out;
+	    }
+	  log_msg_error (ctx->loghandle, "After afild to wait for card insertion");
+	  //############################################################################################################
+	  	  	  	if (fflush (NULL))
+	  	  	  		 	      {
+	  	  	  		 	        err = gpg_error_from_syserror ();
+	  	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	  	  	  		 	  		     strerror (errno));
+	  	  	  		 	        return err;
+	  	  	  		 	      }
+	  //############################################################################################################
+
+	  if (fflush (NULL))
+	  	 	      {
+	  	 	        err = gpg_error_from_syserror ();
+	  	 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	  	 	  		     strerror (errno));
+	  	 	        return err;
+	  	 	      }
+	  /*** Receive card info. ***/
+
+	  err = scd_learn (ctx->scd, &ctx->cardinfo);
+	  if (err)
+	    goto out;
+
+	  if (ctx->debug)
+	    log_msg_debug (ctx->loghandle,
+			   "connected to card; serial number is: %s",
+			   ctx->cardinfo.serialno);
+
+	  if (fflush (NULL))
+	  	 	      {
+	  	 	        err = gpg_error_from_syserror ();
+	  	 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	  	 	  		     strerror (errno));
+	  	 	        return err;
+	  	 	      }
+	  /*** Authenticate.  ***/
+
+	  if (pam_username)
+	    {
+	      /* Try to authenticate user as PAM_USERNAME.  */
+
+	      if (!(*auth_methods[ctx->auth_method].method->func_auth_as) (ctx, ctx->cookie,
+									   pam_username))
+		/* Authentication failed.  */
+		err = GPG_ERR_GENERAL;
+	    }
+	  else
+	    {
+	      /* Try to authenticate user, choosing an identity is up to the
+		 user.  */
+
+	      char *username_authenticated = NULL;
+
+	      if (!(*auth_methods[ctx->auth_method].method->func_auth) (ctx, ctx->cookie,
+									&username_authenticated))
+		/* Authentication failed.  */
+		err = GPG_ERR_GENERAL;
+	      else
+		{
+		  /* Send username received during authentication process back
+		     to PAM.  */
+		  ret = pam_set_item (ctx->pam_handle, PAM_USER,
+				      username_authenticated);
+		  if (ret == PAM_SUCCESS)
+		    err = 0;
+		  else
+		    err = gpg_error (GPG_ERR_INTERNAL);
+
+		  xfree (username_authenticated);
+		}
+	    }
 
 	 out:
 //
@@ -1206,10 +1206,10 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 		modify_environment (pam_handle, ctx);
 	    }
 
-//	  /* Call authentication method's deinit callback. */
-//	  if ((ctx->auth_method >= 0)
-//	      && auth_methods[ctx->auth_method].method->func_deinit)
-//	    (*auth_methods[ctx->auth_method].method->func_deinit) (ctx->cookie);
+	  /* Call authentication method's deinit callback. */
+	  if ((ctx->auth_method >= 0)
+	      && auth_methods[ctx->auth_method].method->func_deinit)
+	    (*auth_methods[ctx->auth_method].method->func_deinit) (ctx->cookie);
 
 	  /* FIXME, cosmetics? */
 	  conv_destroy (conv);
