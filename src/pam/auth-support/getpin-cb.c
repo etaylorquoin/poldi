@@ -138,7 +138,12 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 //	  pam_set_data(ctx->pam_handle, "poldi-scd", (void *) buffer, cleanup_token);
 
 	  //add key to kernel
-	  add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_SESSION_KEYRING);
+	  long rt_val = add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_SESSION_KEYRING);
+	  if(rt_val == -1)
+	  {
+		  log_msg_error (ctx->loghandle, "Error setting pin in keyutils: %lx", rt_val);
+	  }
+
 	  log_msg_error (ctx->loghandle, "SET PIN in kernel to: %s", buffer);//TESTING**********************REMOVE*+*******************************************
 
   }
