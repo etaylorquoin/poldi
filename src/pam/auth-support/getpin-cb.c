@@ -65,6 +65,12 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
   //if pin is cached in kernel use it
   key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_SESSION_KEYRING);
   log_msg_error (ctx->loghandle, "IN getpin sn: %lx", sn);
+  //############################################################################################################
+  	  	  	if (fflush (NULL))
+  	  	  		 	      {
+
+  	  	  		 	      }
+  //############################################################################################################
   if (sn != -1)
   {
 	  char *rtSecret;
@@ -75,6 +81,14 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 		  rc = gpg_error (GPG_ERR_INV_DATA); /* ? */
 		  goto out;
 	  }
+
+	  log_msg_error (ctx->loghandle, "rtPIN in getpin: %s", rtSecret);//TESTING**********************REMOVE*+*******************************************
+	  //############################################################################################################
+	  	  	  	if (fflush (NULL))
+	  	  	  		 	      {
+
+	  	  	  		 	      }
+	  //############################################################################################################
 
 	  strncpy (pin, rtSecret, pin_size - 1);
 	  pin[pin_size-1] = 0;
