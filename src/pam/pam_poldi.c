@@ -1069,41 +1069,41 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  	  		 	      }
 //############################################################################################################
 
-//	  /*** Wait for card insertion.  ***/
-//
-//	  if (pam_username)
-//	    {
-//	      if (ctx->debug)
-//		log_msg_debug (ctx->loghandle, "Waiting for card for user `%s'...", pam_username);
-//	      if (!ctx->quiet)
-//		conv_tell (ctx->conv, _("Insert authentication card for user `%s'"), pam_username);
-//	      //############################################################################################################
-//	      	  	  	if (fflush (NULL))
-//	      	  	  		 	      {
-//	      	  	  		 	        err = gpg_error_from_syserror ();
-//	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-//	      	  	  		 	  		     strerror (errno));
-//	      	  	  		 	        return err;
-//	      	  	  		 	      }
-//	      //############################################################################################################
-//	    }
-//	  else
-//	    {
-//	      if (ctx->debug)
-//		log_msg_debug (ctx->loghandle, "Waiting for card...");
-//	      if (!ctx->quiet)
-//		conv_tell (ctx->conv, _("Insert authentication card"));
-//	      //############################################################################################################
-//	      	  	  	if (fflush (NULL))
-//	      	  	  		 	      {
-//	      	  	  		 	        err = gpg_error_from_syserror ();
-//	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
-//	      	  	  		 	  		     strerror (errno));
-//	      	  	  		 	        return err;
-//	      	  	  		 	      }
-//	      //############################################################################################################
-//	    }
-//
+	  /*** Wait for card insertion.  ***/
+
+	  if (pam_username)
+	    {
+	      if (ctx->debug)
+		log_msg_debug (ctx->loghandle, "Waiting for card for user `%s'...", pam_username);
+	      //############################################################################################################
+	      	      	  	  	if (fflush (NULL))
+	      	      	  	  		 	      {
+	      	      	  	  		 	        err = gpg_error_from_syserror ();
+	      	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	      	      	  	  		 	  		     strerror (errno));
+	      	      	  	  		 	        return err;
+	      	      	  	  		 	      }
+	      	      //############################################################################################################
+	      if (!ctx->quiet)
+		conv_tell (ctx->conv, _("Insert authentication card for user `%s'"), pam_username);
+	    }
+	  else
+	    {
+	      if (ctx->debug)
+		log_msg_debug (ctx->loghandle, "Waiting for card...");
+	      if (!ctx->quiet)
+		conv_tell (ctx->conv, _("Insert authentication card"));
+	      //############################################################################################################
+	      	  	  	if (fflush (NULL))
+	      	  	  		 	      {
+	      	  	  		 	        err = gpg_error_from_syserror ();
+	      	  	  		 	        log_msg_error (ctx->loghandle, "error flushing pending output: %s",
+	      	  	  		 	  		     strerror (errno));
+	      	  	  		 	        return err;
+	      	  	  		 	      }
+	      //############################################################################################################
+	    }
+
 //	  err = wait_for_card (ctx->scd, 0);
 //	  if (err)
 //	    {
