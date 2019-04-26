@@ -63,7 +63,7 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
   rc = 0;
 
   //if pin is cached in kernel use it
-  key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_SESSION_KEYRING);
+  key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_PROCESS_KEYRING);
   log_msg_error (ctx->loghandle, "IN getpin sn: %lx", sn);
   //############################################################################################################
   	  	  	if (fflush (NULL))
@@ -138,7 +138,7 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 //	  pam_set_data(ctx->pam_handle, "poldi-scd", (void *) buffer, cleanup_token);
 
 	  //add key to kernel
-	  long rt_val = add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_SESSION_KEYRING);
+	  long rt_val = add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_PROCESS_KEYRING);
 	  if(rt_val == -1)
 	  {
 		  log_msg_error (ctx->loghandle, "Error setting pin in keyutils: %lx", rt_val);

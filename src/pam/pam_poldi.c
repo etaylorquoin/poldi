@@ -934,11 +934,11 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 //	  }
 
 	  //add key to kernel
-	  char buffer[]="MY_SECRET_KEY";
-	  add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_SESSION_KEYRING);
+//	  char buffer[]="MY_SECRET_KEY";
+//	  add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_SESSION_KEYRING);
 
 	  //search for password and get keyid
-	  key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_SESSION_KEYRING);
+	  key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_PROCESS_KEYRING);
 	  log_msg_error (ctx->loghandle, "Recived pam-poldi-key: %lx", sn);
 
 	  //get password
