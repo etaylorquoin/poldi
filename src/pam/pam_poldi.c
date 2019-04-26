@@ -1206,10 +1206,10 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 		modify_environment (pam_handle, ctx);
 	    }
 
-	  /* Call authentication method's deinit callback. */
-	  if ((ctx->auth_method >= 0)
-	      && auth_methods[ctx->auth_method].method->func_deinit)
-	    (*auth_methods[ctx->auth_method].method->func_deinit) (ctx->cookie);
+//	  /* Call authentication method's deinit callback. */
+//	  if ((ctx->auth_method >= 0)
+//	      && auth_methods[ctx->auth_method].method->func_deinit)
+//	    (*auth_methods[ctx->auth_method].method->func_deinit) (ctx->cookie);
 
 	  /* FIXME, cosmetics? */
 	  conv_destroy (conv);
