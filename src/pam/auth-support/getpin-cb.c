@@ -64,7 +64,7 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 
   //if pin is cached in kernel use it
   key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_SESSION_KEYRING);
-
+  log_msg_error (ctx->loghandle, "IN getpin sn: %lx", sn);
   if (sn != -1)
   {
 	  char *rtSecret;
