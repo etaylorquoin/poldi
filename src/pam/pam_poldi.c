@@ -524,16 +524,6 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 	goto out;
     }
 
-  const char *tok = NULL;
-  int someVal=0;
-  int retval=0;
- someVal = pam_get_item(ctx->pam_handle, PAM_AUTHTOK, (const void **) tok);
- log_msg_error (ctx->loghandle, "In Auth Toke");
- log_msg_error (ctx->loghandle, "In Auth tok err value: %d", someVal);
- 	  		  if (tok != NULL)
- 	  	  	  {
- 	  	          log_msg_error (ctx->loghandle, "Auth: tok: %s", tok);
- 	  	      }
 
   /*** Prepare PAM interaction.  ***/
 
@@ -791,24 +781,10 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 		/* Last try...  */
 		log_set_backend_syslog (ctx->loghandle);
 	    }
-	  log_msg_error (ctx->loghandle,"INIT Logging");////////////////////////////////////////////////
 
 	  /*** Sanity checks. ***/
 
-	  const char *tok = NULL;
-	  if (pam_get_item(ctx->pam_handle, PAM_AUTHTOK, (const void **) &tok) == PAM_SUCCESS && tok != NULL)
-	  	 {
-	  		  if (tok != NULL)
-	  	  	  {
-	  	  	   	  log_msg_error (ctx->loghandle, "In Session Toke If");
-	  	          log_msg_error (ctx->loghandle, "Session: tok: %s", tok);
-	  	      }
 
-	  	 }
-	  	  else
-	  	  {
-	  		  log_msg_error (ctx->loghandle, "Session: Unable to get AUTHTOK");
-	  	  }
 	  	  /*** Basic initialization. ***/
 	  /* Authentication method to use must be specified.  */
 	  if (ctx->auth_method < 0)
@@ -823,7 +799,6 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  assert ((!auth_methods[ctx->auth_method].method->config)
 		  || (auth_methods[ctx->auth_method].method->parsecb
 		      && auth_methods[ctx->auth_method].method->opt_specs));
-	  log_msg_error (ctx->loghandle,"Setup Auth method ASSERT");////////////////////////////////////////////////
 
 	  if (ctx->debug)
 	    {
@@ -831,7 +806,6 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 			     "using authentication method `%s'",
 			     auth_methods[ctx->auth_method].name);
 	    }
-	  log_msg_error (ctx->loghandle,"Setup Auth method 1");////////////////////////////////////////////////
 	  /*** Init authentication method.  ***/
 
 	  if (auth_methods[ctx->auth_method].method->func_init)
@@ -845,7 +819,6 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 		  goto out;
 		}
 	    }
-	  log_msg_error (ctx->loghandle,"Setup Auth method 2");////////////////////////////////////////////////
 	  if (auth_methods[ctx->auth_method].method->config)
 	    {
 	      /* Do auth-method specific parsing. */
@@ -858,7 +831,6 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 				 auth_methods[ctx->auth_method].name, gpg_strerror (err));
 		  goto out_parsing;
 		}
-		  log_msg_error (ctx->loghandle,"Setup Auth method 3");////////////////////////////////////////////////
 	      method_parse_cookie.poldi_ctx = ctx;
 	      method_parse_cookie.method_ctx = ctx->cookie;
 
@@ -872,7 +844,6 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 
 	      err = simpleparse_parse_file (method_parse, 0,
 					    auth_methods[ctx->auth_method].method->config);
-		  log_msg_error (ctx->loghandle,"Setup Auth method 4");////////////////////////////////////////////////
 	      if (err)
 		{
 		  log_msg_error (ctx->loghandle,
@@ -880,7 +851,6 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 				 auth_methods[ctx->auth_method].name, gpg_strerror (err));
 		  goto out_parsing;
 		}
-		  log_msg_error (ctx->loghandle,"Setup Auth method 5");////////////////////////////////////////////////
 	    out_parsing:
 
 	      simpleparse_destroy (method_parse);

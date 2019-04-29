@@ -238,8 +238,9 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 
   ctx = xtrymalloc (sizeof (*ctx));
   if (!ctx)
-    return gpg_error_from_syserror ();
-  log_msg_error (loghandle, "In scd_connect, after xtrymalloc");
+  {
+	  return gpg_error_from_syserror ();
+  }
   ctx->assuan_ctx = NULL;
   ctx->flags = 0;
 
@@ -252,13 +253,10 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  const char *tok = NULL;
 	  char * gpg_agent_sockname = NULL;
 	  char *scd_socket_name = NULL;
-	  log_msg_error (loghandle, "Def Vars");
 
 	  const char *cmd[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
-	  log_msg_error (loghandle, "Set command");
 	  int input;
 	  char **env = pam_getenvlist(pam_handle);
-	  log_msg_error (loghandle, "Call pam_getenvlist");
 
 	  //runs a command as another user
 	  const int pid = run_as_user(&uinfo, cmd, &input, env);
@@ -412,29 +410,10 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
     {
       /* FIXME: is this the best way?  -mo */
       //reset_scd (assuan_ctx);
-	  log_msg_debug (loghandle, "Getting SN");
-	  if (fflush (NULL))
-	 	      {
-	 	        err = gpg_error_from_syserror ();
-	 	        log_msg_error (loghandle, "error flushing pending output: %s",
-	 	  		     strerror (errno));
-	 	        return err;
-	 	      }
+
 	  char *card_sn = NULL;
       err = scd_serialno_internal (assuan_ctx, &card_sn);
-      if(err)
-      {
-    	  log_msg_debug (loghandle, "Erroring Getting Serail Number: %s", gpg_strerror(err));
-    	  log_msg_debug (loghandle, "Erroring Getting Serail Number: %d", err);
-      }
-      log_msg_debug (loghandle, "SN: %s", card_sn);
-      if (fflush (NULL))
-     	      {
-     	        err = gpg_error_from_syserror ();
-     	        log_msg_error (loghandle, "error flushing pending output: %s",
-     	  		     strerror (errno));
-     	        return err;
-     	      }
+
       ctx->assuan_ctx = assuan_ctx;
       ctx->flags = 0;
       ctx->loghandle = loghandle;
