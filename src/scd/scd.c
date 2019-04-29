@@ -227,7 +227,6 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   scd_context_t ctx;
   gpg_error_t err;
 
-  log_msg_error (loghandle, "In scd_connect, user_agent=%d",use_agent);
 
   if (fflush (NULL))
     {
@@ -236,7 +235,6 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 		     strerror (errno));
       return err;
     }
-  log_msg_error (loghandle, "In scd_connect, after fflush");
 
   ctx = xtrymalloc (sizeof (*ctx));
   if (!ctx)
@@ -244,8 +242,6 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   log_msg_error (loghandle, "In scd_connect, after xtrymalloc");
   ctx->assuan_ctx = NULL;
   ctx->flags = 0;
-
-  log_msg_error (loghandle, "AT if user-agnet==2");
 
   if (use_agent == 2)
     {
@@ -263,9 +259,10 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  int input;
 	  char **env = pam_getenvlist(pam_handle);
 	  log_msg_error (loghandle, "Call pam_getenvlist");
+
+	  //runs a command as another user
 	  const int pid = run_as_user(&uinfo, cmd, &input, env);
 
-	  log_msg_error (loghandle, "Call run_as_user");
 	  if (env != NULL) {
 	      free(env);
 	  }
@@ -273,22 +270,6 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	      exit(0);
 	  }
 
-
-//	  int child = fork();
-//	  if( child = 0 )
-//	  {
-//	  setgid(1000);
-//	  setuid(1000);
-//	  err = get_agent_socket_name (&gpg_agent_sockname);
-//	  err = get_scd_socket_from_agent(&gpg_agent_sockname);
-//	  log_msg_error (loghandle, "GPG Socket: %s", gpg_agent_sockname);
-//	  log_msg_error (loghandle, "SCD Socket: %s", gpg_agent_sockname);
-//	  exit(0);
-//	  }
-//	  else
-//	  {
-//		  waitpid(child, NULL, 0);
-//	  }
 	  int fd[2];
 	  size_t maxBuffSize=1024;
 	  char pipe_buff[maxBuffSize];
@@ -326,23 +307,8 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  }
 	  //wait for child to finish
 	  waitpid(frk_val, NULL, 0);
-	  //start scdaemon for user
 	  scd_socket_name=pipe_buff;
-//	  err = assuan_socket_connect (&assuan_gpg_ctx, gpg_agent_sockname, 0);
-//	  //xfree (gpg_agent_sockname);
-//	  if (!err)
-//	  {
-//		  log_msg_error (loghandle, "Connected to gpg socket %s ", gpg_agent_sockname);
-//		  err = agent_scd_getinfo_socket_name (assuan_gpg_ctx, &scd_socket_name);
-//	  }
-//	  else
-//	  {
-//		  log_msg_error (loghandle, "Cant connect to gpg socket %s ", gpg_agent_sockname);
-//	  }
-//
-//	  //disconnect from gpg socket
-//	  assuan_disconnect (assuan_gpg_ctx);
-//
+
 	  //connect to users scdeamon socket
 	  err = assuan_socket_connect (&assuan_ctx, scd_socket_name, 0);
 
@@ -354,16 +320,8 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  }
 	  else
 	  {
-		  log_msg_debug (loghandle, "Error getting scdaemon socket: %s", scd_socket_name);
+		  log_msg_debug (loghandle, "Error getting scdaemon socket during session setup: %s", scd_socket_name);
 	  }
-
-	  if (fflush (NULL))
-	      {
-	        err = gpg_error_from_syserror ();
-	        log_msg_error (loghandle, "error flushing pending output: %s",
-	  		     strerror (errno));
-	        return err;
-	      }
   }
 
   /* Try using scdaemon under gpg-agent.  */
