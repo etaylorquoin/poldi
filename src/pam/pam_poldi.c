@@ -668,7 +668,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
   else
     {
       if (ctx->debug)
-	log_msg_debug (ctx->loghandle, "authentication succeeded for user %s", username_authenticated);
+	log_msg_debug (ctx->loghandle, "authentication succeeded for user");
       if (ctx->modify_environment)
 	modify_environment (pam_handle, ctx);
     }
@@ -803,7 +803,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  if (ctx->debug)
 	    {
 	      log_msg_debug (ctx->loghandle,
-			     "using authentication method `%s'",
+			     "using Session setup authentication method `%s'",
 			     auth_methods[ctx->auth_method].name);
 	    }
 	  /*** Init authentication method.  ***/
@@ -936,10 +936,6 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  getpin_cb_data.poldi_ctx = ctx;
 	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
 
-	  if (ctx->debug)
-	  {
-		  log_msg_debug  (ctx->loghandle,"Set Pin call back");
-	  }
 
 	  /*** Wait for card insertion.  ***/
 
@@ -1030,13 +1026,13 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	//  /* Log result.  */
 	  if (err)
 	  {
-		  log_msg_error (ctx->loghandle, "session failed: %s", gpg_strerror (err));
+		  log_msg_error (ctx->loghandle, "Session setup failed: %s", gpg_strerror (err));
 	  }
 	  else
 	    {
 	      if (ctx->debug)
 	      {
-	    	  log_msg_debug (ctx->loghandle, "session succeeded");
+	    	  log_msg_debug (ctx->loghandle, "Session setup succeeded");
 	      }
 	      if (ctx->modify_environment)
 	      {

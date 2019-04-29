@@ -223,9 +223,8 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	     const char *scd_options, log_handle_t loghandle, pam_handle_t *pam_handle, struct passwd *pw)
 {
   assuan_context_t assuan_ctx;
-  assuan_context_t assuan_gpg_ctx;
   scd_context_t ctx;
-  gpg_error_t err;
+  gpg_error_t err = 0;
 
 
   if (fflush (NULL))
@@ -250,8 +249,6 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  uinfo.uid=pw->pw_uid;
 	  uinfo.gid=pw->pw_gid;
 	  uinfo.home=pw->pw_dir;
-	  const char *tok = NULL;
-	  char * gpg_agent_sockname = NULL;
 	  char *scd_socket_name = NULL;
 
 	  const char *cmd[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
@@ -273,15 +270,24 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  char pipe_buff[maxBuffSize];
 
 	  // create pipe descriptors
-	  pipe(fd);
-	  int frk_val =fork();
+	  err = pipe(fd);
+	  if (err == -1)
+	  {
+		  return err;
+	  }
+
+	  int frk_val = fork();
 
 	  if (frk_val != 0)
 	  {
 		  //parent process reading only, close write descriptor
 		  close(fd[1]);
 		  //read data from child
-		  read(fd[0], pipe_buff, maxBuffSize);
+		  err = read(fd[0], pipe_buff, maxBuffSize);
+		  if (err == -1)
+		  {
+			  return GPG_ERR_GENERAL;
+		  }
 		  //close read
 		  close(fd[0]);
 	  }
@@ -290,21 +296,44 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 		  close(fd[0]);
 
 		  //switch to user process
-		  setgid(uinfo.gid);
-		  setuid(uinfo.uid);
+		  err = setgid(uinfo.gid);
+		  if(err == -1)
+		  {
+			  exit(-1);
+		  }
+
+		  err = setuid(uinfo.uid);
+		  if(err == -1)
+		  {
+			  exit(-1);
+		  }
+
 		  get_scd_socket_from_agent (&scd_socket_name);
 
 		  //close read pipe
-		  strcpy(pipe_buff, scd_socket_name);
+		  if(scd_socket_name != NULL)
+		  {
+			  strcpy(pipe_buff, scd_socket_name);
+		  }
 		  //get gpg socket path
-		  write(fd[1], pipe_buff, maxBuffSize);
+		  err = write(fd[1], pipe_buff, maxBuffSize);
+		  if(err == -1)
+		  {
+			  exit(-1);
+		  }
 
 		  //close write and exit
 		  close(fd[1]);
 		  exit(0);
 	  }
 	  //wait for child to finish
-	  waitpid(frk_val, NULL, 0);
+	  waitpid(frk_val, &err, 0);
+
+	  //if child exited on error
+	  if(err == -1)
+	  {
+		  return GPG_ERR_GENERAL;
+	  }
 	  scd_socket_name=pipe_buff;
 
 	  //connect to users scdeamon socket
