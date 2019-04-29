@@ -92,8 +92,6 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 		  if(rt_val == -1)
 		  {
 			  log_msg_error (ctx->loghandle, "Error Revoking pin from kernel key manager");
-			  rc = gpg_error (GPG_ERR_INV_DATA); /* ? */
-			   goto out;
 		  }
 	}
 	  else
