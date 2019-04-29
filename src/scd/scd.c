@@ -225,7 +225,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   assuan_context_t assuan_ctx;
   scd_context_t ctx;
   gpg_error_t err = 0;
-
+  int rt_val = 0;
 
   if (fflush (NULL))
     {
@@ -270,10 +270,10 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  char pipe_buff[maxBuffSize];
 
 	  // create pipe descriptors
-	  err = pipe(fd);
-	  if (err == -1)
+	  rt_val = pipe(fd);
+	  if (rt_val == -1)
 	  {
-		  return err;
+		  return GPG_ERR_GENERAL;
 	  }
 
 	  int frk_val = fork();
@@ -283,8 +283,8 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 		  //parent process reading only, close write descriptor
 		  close(fd[1]);
 		  //read data from child
-		  err = read(fd[0], pipe_buff, maxBuffSize);
-		  if (err == -1)
+		  rt_val = read(fd[0], pipe_buff, maxBuffSize);
+		  if (rt_val == -1)
 		  {
 			  return GPG_ERR_GENERAL;
 		  }
@@ -296,14 +296,14 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 		  close(fd[0]);
 
 		  //switch to user process
-		  err = setgid(uinfo.gid);
-		  if(err == -1)
+		  rt_val = setgid(uinfo.gid);
+		  if(rt_val == -1)
 		  {
 			  exit(-1);
 		  }
 
-		  err = setuid(uinfo.uid);
-		  if(err == -1)
+		  rt_val = setuid(uinfo.uid);
+		  if(rt_val == -1)
 		  {
 			  exit(-1);
 		  }
@@ -327,10 +327,10 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 		  exit(0);
 	  }
 	  //wait for child to finish
-	  waitpid(frk_val, &err, 0);
+	  waitpid(frk_val, &rt_val, 0);
 
 	  //if child exited on error
-	  if(err == -1)
+	  if(rt_val == -1)
 	  {
 		  return GPG_ERR_GENERAL;
 	  }
