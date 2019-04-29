@@ -64,13 +64,7 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 
   //if pin is cached in kernel use it
   key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_PROCESS_KEYRING);
-  log_msg_error (ctx->loghandle, "IN getpin sn: %lx", sn);
-  //############################################################################################################
-  	  	  	if (fflush (NULL))
-  	  	  		 	      {
 
-  	  	  		 	      }
-  //############################################################################################################
   if (sn != -1)
   {
 	  char *rtSecret;
@@ -82,20 +76,14 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 		  goto out;
 	  }
 
-	  log_msg_error (ctx->loghandle, "rtPIN in getpin: %s", rtSecret);//TESTING**********************REMOVE*+*******************************************
-	  //############################################################################################################
-	  	  	  	if (fflush (NULL))
-	  	  	  		 	      {
-
-	  	  	  		 	      }
-	  //############################################################################################################
-
 	  strncpy (pin, rtSecret, pin_size - 1);
 	  pin[pin_size-1] = 0;
 
-	  //overwrite and free ERASE rtSecret *******************************************************************************************************************************
-	  log_msg_error (ctx->loghandle, "PIN in getpin: %s", pin);//TESTING**********************REMOVE*+*******************************************
-
+	  //overwrite password
+	  if( rtSecret != NULL)
+	  {
+		  wipestr(rtSecret);
+	  }
 	  //revoke key
 	  rt_val = keyctl_revoke(sn);
   }
@@ -131,25 +119,12 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
 	  strncpy (pin, buffer, pin_size - 1);
 	  pin[pin_size-1] = 0;
 
-	  //#########################################################################################################
-//	  char *sendPinBuff;
-//	  sendPinBuff = gcry_malloc_secure(strlen(buffer) + 1);
-//	  strncpy (sendPinBuff, buffer, strlen(sendPinBuff));
-//	  pam_set_data(ctx->pam_handle, "poldi-scd", (void *) buffer, cleanup_token);
-
-	  //add key to kernel
+	  //save key to kernel key manager
 	  long rt_val = add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_PROCESS_KEYRING);
 	  if(rt_val == -1)
 	  {
-		  log_msg_error (ctx->loghandle, "Error setting pin in keyutils: %lx", rt_val);
+		  log_msg_error (ctx->loghandle, "Error saving pin to the kernel key manager: %lx", rt_val);
 	  }
-	  else
-	  {
-		  log_msg_error (ctx->loghandle, "Added pin in keyutils: %lx", rt_val);
-	  }
-
-	  log_msg_error (ctx->loghandle, "SET PIN in kernel to: %s", buffer);//TESTING**********************REMOVE*+*******************************************
-
   }
 
  out:

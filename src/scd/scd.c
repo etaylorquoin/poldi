@@ -1061,27 +1061,4 @@ void close_safe(int fd)
         close(fd);
     }
 }
-
-/* Copied from gnome-keyring */
-void wipestr(char *data) {
-    volatile char *vp;
-    size_t len;
-    if (!data) {
-        return;
-    }
-    /* Defeats some optimizations */
-    len = strlen(data);
-    memset(data, 0xAA, len);
-    memset(data, 0xBB, len);
-    /* Defeats others */
-    vp = (volatile char*) data;
-    while (*vp) {
-        *(vp++) = 0xAA;
-    }
-    gcry_free((void *) data);
-}
-
-void cleanup_token(pam_handle_t *pamh, void *data, int error_status) {
-    wipestr(data);
-}
 /* END */

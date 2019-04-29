@@ -71,6 +71,8 @@ void char_vector_free (char **a);
 
 int my_strlen (const char *s);
 
+void wipestr(char *data);
+
 #endif
 
 /* END */

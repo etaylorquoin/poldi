@@ -424,4 +424,23 @@ my_strlen (const char *s)
   return ret;
 }
 
+
+/* Copied from gnome-keyring */
+void wipestr(char *data) {
+    volatile char *vp;
+    size_t len;
+    if (!data) {
+        return;
+    }
+    /* Defeats some optimizations */
+    len = strlen(data);
+    memset(data, 0xAA, len);
+    memset(data, 0xBB, len);
+    /* Defeats others */
+    vp = (volatile char*) data;
+    while (*vp) {
+        *(vp++) = 0xAA;
+    }
+    gcry_free((void *) data);
+}
 /* END */
