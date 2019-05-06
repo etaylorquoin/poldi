@@ -91,7 +91,7 @@ int main (int argc, const char *argv[])
 			break;//error
 
 		default:
-			abort();
+			break;
 		}//switch
 
 
