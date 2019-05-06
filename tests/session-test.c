@@ -17,7 +17,7 @@
 static void print_help(void);
 static void print_version (void);
 
-int main (int argc, const char **argv)
+int main (int argc, const char *argv[])
 {
 	gpg_error_t err = 0;
 	log_handle_t loghandle = NULL;
@@ -63,7 +63,7 @@ int main (int argc, const char **argv)
 		//end of options
 		if (rt_val == -1)
 		{
-			break;
+			//break;
 		}
 
 		switch (rt_val)
