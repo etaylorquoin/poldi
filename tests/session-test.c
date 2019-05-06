@@ -63,7 +63,7 @@ int main (int argc, const char *argv[])
 		//end of options
 		if (rt_val == -1)
 		{
-			//break;
+			break;
 		}
 
 		switch (rt_val)
@@ -91,7 +91,7 @@ int main (int argc, const char *argv[])
 			break;//error
 
 		default:
-			break;
+			abort();
 		}//switch
 
 
