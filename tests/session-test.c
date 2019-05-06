@@ -15,6 +15,7 @@
 
 //void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle);
 static void print_help(void);
+static void print_version (void);
 
 int main (int argc, const char **argv)
 {
@@ -22,6 +23,8 @@ int main (int argc, const char **argv)
 	log_handle_t loghandle = NULL;
 	simpleparse_handle_t handle = NULL;
 	pam_handle_t *pam_handle = NULL;
+	const char *username = NULL;
+
 	int rt_val;
 
 	assert (argc > 0);
@@ -39,7 +42,7 @@ int main (int argc, const char **argv)
 	}
 	else
 	{
-		printf("Testing for user %s \n", argv[1]);
+
 	}
 
 	//while(1)
@@ -47,6 +50,7 @@ int main (int argc, const char **argv)
 		static struct option long_options[] =
 		{
 		  { "version", no_argument, 0, 'v' },
+		  { "user", required_argument, 0, 'u' },
 		  { "help", no_argument, 0, 'h' },
 		  { 0, 0, 0, 0 }
 		};
@@ -56,9 +60,42 @@ int main (int argc, const char **argv)
 		rt_val = getopt_long (argc, argv, "vh:",
 			       long_options, &index);
 
-		printf("rt_val: %d", rt_val);
+		//end of options
+		if (rt_val == -1)
+		{
+			break;
+		}
+
+		switch (rt_val)
+		{
+		case 'u':
+			username = strdup (optarg);
+			if (!username)
+			{
+			  fprintf (stderr, "failed to duplicate username: %s", strerror (errno));
+			  exit (1);
+			}
+			break;
+
+		case 'h':
+			print_help();
+			exit(0);
+			break;
+
+		case 'v':
+			print_version();
+			exit(0);
+			break;
+
+		case '?':
+			break;//error
+
+		default:
+			abort();
+		}
 
 
+		printf("Testing for user %s \n", argv[1]);
 	}
 
 	//printf("Testing scd_connect() \n");
@@ -79,6 +116,12 @@ Options:\n\
  -h, --help      print help information\n\
  -v, --version   print version information\n\
 \n", PROGRAM_NAME);
+}
+
+
+static void print_version (void)
+{
+  printf (PROGRAM_NAME " " PROGRAM_VERSION "\n");
 }
 
 //void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle)
