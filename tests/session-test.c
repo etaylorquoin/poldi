@@ -97,6 +97,15 @@ int main (int argc, const char *argv[])
 
 
 	}//while
+
+	if (argc - optind != 1)
+	{
+	  print_help ();
+	  exit (1);
+	}
+
+	username = argv[optind];
+
 	printf("Testing for user %s \n", argv[1]);
 	//printf("Testing scd_connect() \n");
 	//test_scd_connect(loghandle);
