@@ -50,8 +50,8 @@ int main (int argc, const char *argv[])
 		static struct option long_options[] =
 		{
 		  { "version", no_argument, 0, 'v' },
-		  { "user", required_argument, 0, 'u' },
 		  { "help", no_argument, 0, 'h' },
+		  { "user", required_argument, 0, 'u' },
 		  { 0, 0, 0, 0 }
 		};
 
