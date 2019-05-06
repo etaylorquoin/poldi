@@ -45,7 +45,7 @@ int main (int argc, const char *argv[])
 
 	}
 
-	//while(1)
+	while(1)
 	{
 		static struct option long_options[] =
 		{
@@ -92,12 +92,12 @@ int main (int argc, const char *argv[])
 
 		default:
 			abort();
-		}
+		}//switch
 
 
-		printf("Testing for user %s \n", argv[1]);
-	}
 
+	}//while
+	printf("Testing for user %s \n", argv[1]);
 	//printf("Testing scd_connect() \n");
 	//test_scd_connect(loghandle);
 
