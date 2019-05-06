@@ -106,7 +106,7 @@ int main (int argc, const char *argv[])
 
 	username = argv[optind];
 
-	printf("Testing for user %s \n", argv[1]);
+	printf("Testing for user %s \n", username);
 	//printf("Testing scd_connect() \n");
 	//test_scd_connect(loghandle);
 
