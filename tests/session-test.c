@@ -12,6 +12,10 @@
 #include <simplelog.h>
 #include "scd/scd.h"
 
+#define MAX_LENGTH      512
+#define str(x)          # x
+#define xstr(x)         str(x)
+
 #define PROGRAM_NAME    "session-test"
 #define PROGRAM_VERSION "0.1"
 
@@ -109,11 +113,17 @@ int main (int argc, const char *argv[])
 	username = argv[optind];
 
 	printf("Testing for user %s \n", username);
-	printf("Testing scd_connect() \n");
+	printf("Testing poldi-session \n");
+
+	//get test pin from user
+	char buff[MAX_LENGTH];
+	printf("Enter pin: ");
+	scanf("%"xstr(MAX_LENGTH)"s", buff);
+	printf("Buff: %s\n");
 
 	enum pamtest_err perr;
 	const char *new_authtoks[] = {
-	        "123456",              /* login pin */
+	        buff,              /* login pin */
 	        NULL,
 	};
 	struct pamtest_conv_data conv_data = {
