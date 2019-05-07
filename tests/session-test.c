@@ -119,7 +119,7 @@ int main (int argc, const char *argv[])
 	char buff[MAX_LENGTH];
 	printf("Enter pin: ");
 	scanf("%"xstr(MAX_LENGTH)"s", &buff);
-	printf("Buff: %s\n");
+	printf("Buff: %s\n" , &buff);
 
 	enum pamtest_err perr;
 	const char *new_authtoks[] = {
