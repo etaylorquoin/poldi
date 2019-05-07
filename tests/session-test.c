@@ -123,7 +123,7 @@ int main (int argc, const char *argv[])
 
 	enum pamtest_err perr;
 	const char *new_authtoks[] = {
-	        "123456",              /* login pin */
+	        buff,              /* login pin */
 	        NULL,
 	};
 	struct pamtest_conv_data conv_data = {
@@ -135,9 +135,9 @@ int main (int argc, const char *argv[])
 		pam_test(PAMTEST_OPEN_SESSION, PAM_SUCCESS),
 	};
 
-	perr = run_pamtest("matrix.in",             /* PAM service */
-	                   "etaylor",                /* user logging in */
-	                    &conv_data, tests);  /* conversation data and array of tests */
+	perr = run_pamtest("poldi",	//service name
+						username,	//username
+	                    &conv_data, tests);	//conversation data and array of tests
 
 	printf("err = %d\n", perr);
 
@@ -175,8 +175,6 @@ int main (int argc, const char *argv[])
 	     printf("Error unknown\n");
 
 	   };
-
-
 
 	//test_scd_connect(username, loghandle, NULL);
 
