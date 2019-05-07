@@ -15,7 +15,7 @@
 #define PROGRAM_NAME    "session-test"
 #define PROGRAM_VERSION "0.1"
 
-void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle);
+//void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle);
 static void print_help(void);
 static void print_version (void);
 
@@ -192,29 +192,28 @@ static void print_version (void)
   printf (PROGRAM_NAME " " PROGRAM_VERSION "\n");
 }
 
-void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle)
-{
-	gpg_error_t err = 0;
-
-	err = log_set_backend_stream (loghandle, stderr);
-	assert (!err);
-
-	gpg_error_t err;
-	scd_context_t scd_ctx;
-	int use_agent = 2;
-
-	struct passwd pwd, *result;
-	char *buf = NULL;
-	size_t bufsize;
-
-	bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-	if (bufsize == -1)
-	{
-		bufsize = 16384;
-	}
-
-	//allocate and get users passwd strcut
-	buf = (char*) malloc(bufsize);
-	ret = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
-}
+//void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle)
+//{
+//	gpg_error_t err = 0;
+//
+//	err = log_set_backend_stream (loghandle, stderr);
+//	assert (!err);
+//
+//	scd_context_t scd_ctx;
+//	int use_agent = 2;
+//
+//	struct passwd pwd, *result;
+//	char *buf = NULL;
+//	size_t bufsize;
+//
+//	bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+//	if (bufsize == -1)
+//	{
+//		bufsize = 16384;
+//	}
+//
+//	//allocate and get users passwd strcut
+//	buf = (char*) malloc(bufsize);
+//	ret = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
+//}
 
