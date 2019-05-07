@@ -23,7 +23,7 @@
 static void print_help(void);
 static void print_version (void);
 
-int main (int argc, const char *argv[])
+int main (int argc, const char*const* argv)
 {
 	gpg_error_t err = 0;
 	log_handle_t loghandle = NULL;
