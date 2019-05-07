@@ -7,5 +7,6 @@ if  [ -f "${session_bin}" ]
 then
    eval "${preloader_cmd}"
 else
+   printf 'Error Please compile session-test\n'
 fi
 
