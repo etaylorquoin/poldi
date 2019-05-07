@@ -133,8 +133,6 @@ int main (int argc, const char *argv[])
 	    /* pam function to execute and expected return code */
 	    pam_test(PAMTEST_AUTHENTICATE, PAM_SUCCESS),
 		pam_test(PAMTEST_OPEN_SESSION, PAM_SUCCESS),
-		pam_test(PAMTEST_CLOSE_SESSION, PAM_SUCCESS),
-
 	};
 
 	perr = run_pamtest("matrix.in",             /* PAM service */
