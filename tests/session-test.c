@@ -4,16 +4,18 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <errno.h>
+
 #include <gpg-error.h>
+#include <libpamtest.h>
 
 #include <simpleparse.h>
 #include <simplelog.h>
 #include "scd/scd.h"
 
-#define PROGRAM_NAME    "pam-session"
+#define PROGRAM_NAME    "session-test"
 #define PROGRAM_VERSION "0.1"
 
-//void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle);
+void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle);
 static void print_help(void);
 static void print_version (void);
 
@@ -63,7 +65,7 @@ int main (int argc, const char *argv[])
 		//end of options
 		if (rt_val == -1)
 		{
-			break;
+			 break;
 		}
 
 		switch (rt_val)
@@ -107,8 +109,65 @@ int main (int argc, const char *argv[])
 	username = argv[optind];
 
 	printf("Testing for user %s \n", username);
-	//printf("Testing scd_connect() \n");
-	//test_scd_connect(loghandle);
+	printf("Testing scd_connect() \n");
+
+	enum pamtest_err perr;
+	const char *new_authtoks[] = {
+	        "123456",              /* login pin */
+	        NULL,
+	};
+	struct pamtest_conv_data conv_data = {
+	     .in_echo_off = new_authtoks,
+	};
+	struct pam_testcase tests[] = {
+	    /* pam function to execute and expected return code */
+	    pam_test(PAMTEST_AUTHENTICATE, PAM_SUCCESS),
+	};
+
+	perr = run_pamtest("matrix.in",             /* PAM service */
+	                   "etaylor",                /* user logging in */
+	                    &conv_data, tests);  /* conversation data and array of tests */
+
+	printf("err = %d\n", perr);
+
+	switch (perr)
+	{
+	   case PAMTEST_ERR_OK:
+	      printf("Pass\n");
+	      break;
+
+	   case PAMTEST_ERR_START:
+	     printf("Error Starting pam\n");
+	      break;
+
+	   case PAMTEST_ERR_CASE:
+	      printf("Error couldn't run test case\n");
+	      break;
+
+	   case PAMTEST_ERR_OP:
+	      printf("Error couldn't run test case\n");
+	      break;
+
+	   case PAMTEST_ERR_END:
+	      printf("Error pam end faild\n");
+	      break;
+
+	   case PAMTEST_ERR_KEEPHANDLE:
+	      printf("Error internal\n");
+	      break;
+
+	   case PAMTEST_ERR_INTERNAL:
+	      printf("Error internal\n");
+	      break;
+
+	   default:
+	     printf("Error unknown\n");
+
+	   };
+
+	}
+
+	//test_scd_connect(username, loghandle, NULL);
 
 	return 0;
 
@@ -133,29 +192,29 @@ static void print_version (void)
   printf (PROGRAM_NAME " " PROGRAM_VERSION "\n");
 }
 
-//void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle)
-//{
-//	gpg_error_t err = 0;
-//
-//	err = log_set_backend_stream (loghandle, stderr);
-//	assert (!err);
-//
-//	gpg_error_t err;
-//	scd_context_t scd_ctx;
-//	int use_agent = 2;
-//
-//	struct passwd pwd, *result;
-//	char *buf = NULL;
-//	size_t bufsize;
-//
-//	bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-//	if (bufsize == -1)
-//	{
-//		bufsize = 16384;
-//	}
-//
-//	//allocate and get users passwd strcut
-//	//buf = (char*) malloc(bufsize);
-//	//ret = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
-//}
+void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle)
+{
+	gpg_error_t err = 0;
+
+	err = log_set_backend_stream (loghandle, stderr);
+	assert (!err);
+
+	gpg_error_t err;
+	scd_context_t scd_ctx;
+	int use_agent = 2;
+
+	struct passwd pwd, *result;
+	char *buf = NULL;
+	size_t bufsize;
+
+	bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+	if (bufsize == -1)
+	{
+		bufsize = 16384;
+	}
+
+	//allocate and get users passwd strcut
+	buf = (char*) malloc(bufsize);
+	ret = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
+}
 

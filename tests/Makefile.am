@@ -35,4 +35,4 @@ session_test_SOURCES = session-test.c
 session_test_CFLAGS = -Wall -I$(top_srcdir)/src/util -I$(top_srcdir)/src \
  $(GPG_ERROR_CFLAGS)
 session_test_LDADD = $(top_builddir)/src/util/libpoldi-util.a \
- $(GPG_ERROR_LIBS) $(LIBGCRYPT_LIBS)
+ $(GPG_ERROR_LIBS) $(LIBGCRYPT_LIBS) -lpamtest
