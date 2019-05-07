@@ -116,7 +116,15 @@ int main (int argc, char*const* argv)
 	//get test pin from user
 	char buff[MAX_LENGTH];
 	printf("Enter pin: ");
-	scanf("%"xstr(MAX_LENGTH)"s", buff);
+	err = scanf("%"xstr(MAX_LENGTH)"s", buff);
+
+	//scanf error
+	if(err <= 0)
+	{
+		printf("Error reading pin\n");
+		return 1;
+	}
+
 	printf("Buff: %s\n" , buff);
 
 	enum pamtest_err perr;
