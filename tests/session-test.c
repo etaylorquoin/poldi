@@ -27,8 +27,6 @@ int main (int argc, const char *argv[])
 {
 	gpg_error_t err = 0;
 	log_handle_t loghandle = NULL;
-	simpleparse_handle_t handle = NULL;
-	pam_handle_t *pam_handle = NULL;
 	const char *username = NULL;
 
 	int rt_val;
