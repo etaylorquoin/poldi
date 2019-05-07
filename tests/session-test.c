@@ -123,7 +123,7 @@ int main (int argc, const char *argv[])
 
 	enum pamtest_err perr;
 	const char *new_authtoks[] = {
-	        buff,              /* login pin */
+	        "123456",              /* login pin */
 	        NULL,
 	};
 	struct pamtest_conv_data conv_data = {
