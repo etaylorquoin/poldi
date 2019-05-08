@@ -145,14 +145,15 @@ int main (int argc, char*const* argv)
 	//if error accrued during session setup
 	if(perr != PAMTEST_ERR_OK)
 	{
-		printf("Error starting session/n");
+		printf("Error starting session: \n");
 		print_error(perr);
 		return perr;
 	}
 
 	//attempt to authenticate with no pin/password
 	const char *no_authtoks[] = {
-		        NULL,//no pin
+				NULL,//no pin
+		        NULL,
 	};
 	struct pamtest_conv_data no_conv_data = {
 		 .in_echo_off = no_authtoks,
