@@ -122,8 +122,6 @@ int main (int argc, char*const* argv)
 		return 10;
 	}
 
-	printf("Buff: %s\n" , buff);
-
 	enum pamtest_err perr;
 	const char *new_authtoks[] = {
 	        buff,              /* login pin */
@@ -152,7 +150,7 @@ int main (int argc, char*const* argv)
 
 	//attempt to authenticate with no pin/password
 	const char *no_authtoks[] = {
-				"NoPIN",//no pin
+				buff,//no pin
 		        NULL,
 	};
 	struct pamtest_conv_data no_conv_data = {
