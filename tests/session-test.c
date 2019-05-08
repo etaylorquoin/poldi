@@ -141,8 +141,6 @@ int main (int argc, char*const* argv)
 						username,	//username
 	                    &conv_data, tests);	//conversation data and array of tests
 
-	printf("err = %d\n", perr);
-
 	switch (perr)
 	{
 	   case PAMTEST_ERR_OK:
