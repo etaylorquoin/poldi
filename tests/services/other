@@ -1,4 +1,2 @@
 auth		   required	/usr/lib/x86_64-linux-gnu/security/pam_poldi.so
-account		required	/usr/lib/x86_64-linux-gnu/security/pam_poldi.so
-password	   required	/usr/lib/x86_64-linux-gnu/security/pam_poldi.so
 session		required	/usr/lib/x86_64-linux-gnu/security/pam_poldi.so

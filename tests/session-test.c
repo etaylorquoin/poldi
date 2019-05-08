@@ -124,9 +124,9 @@ int main (int argc, char*const* argv)
 
 	enum pamtest_err perr;
 	const char *new_authtoks[] = {
-	        buff,              /* login pin */
-	        NULL,
-			NULL,
+	        buff,   //pin
+	        NULL,	//
+			NULL,   //send no pin, test if already unlocked
 	};
 	struct pamtest_conv_data conv_data = {
 	     .in_echo_off = new_authtoks,
@@ -141,14 +141,6 @@ int main (int argc, char*const* argv)
 	perr = run_pamtest("poldi",	//service name
 						username,	//username
 	                    &conv_data, tests);	//conversation data and array of tests
-
-	//if error accrued during session setup
-	if(perr != PAMTEST_ERR_OK)
-	{
-		printf("Error starting session: \n");
-		print_error(perr);
-		return perr;
-	}
 
 	print_error(perr);
 	return perr;
