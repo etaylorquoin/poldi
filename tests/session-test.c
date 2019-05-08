@@ -22,6 +22,7 @@
 //void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle);
 static void print_help(void);
 static void print_version (void);
+static void print_error(enum pamtest_err perr);
 
 int main (int argc, char*const* argv)
 {
@@ -118,7 +119,7 @@ int main (int argc, char*const* argv)
 	if(err <= 0)
 	{
 		printf("Error reading pin\n");
-		return 1;
+		return 10;
 	}
 
 	printf("Buff: %s\n" , buff);
@@ -141,42 +142,33 @@ int main (int argc, char*const* argv)
 						username,	//username
 	                    &conv_data, tests);	//conversation data and array of tests
 
-	switch (perr)
+	//if error accrued during session setup
+	if(perr != PAMTEST_ERR_OK)
 	{
-	   case PAMTEST_ERR_OK:
-	      printf("Pass\n");
-	      break;
+		printf("Error starting session/n");
+		print_error(perr);
+		return perr;
+	}
 
-	   case PAMTEST_ERR_START:
-	     printf("Error Starting pam\n");
-	      break;
+	//attempt to authenticate with no pin/password
+	const char *no_authtoks[] = {
+		        NULL,//no pin
+	};
+	struct pamtest_conv_data conv_data = {
+		 .in_echo_off = no_authtoks,
+	};
+	struct pam_testcase tests[] = {
+		/* pam function to execute and expected return code */
+		pam_test(PAMTEST_AUTHENTICATE, PAM_SUCCESS),
+	};
 
-	   case PAMTEST_ERR_CASE:
-	      printf("Error couldn't run test case\n");
-	      break;
+	perr = run_pamtest("poldi",	//service name
+						username,	//username
+						&conv_data, tests);	//conversation data and array of tests
 
-	   case PAMTEST_ERR_OP:
-	      printf("Error couldn't run test case\n");
-	      break;
-
-	   case PAMTEST_ERR_END:
-	      printf("Error pam end faild\n");
-	      break;
-
-	   case PAMTEST_ERR_KEEPHANDLE:
-	      printf("Error internal\n");
-	      break;
-
-	   case PAMTEST_ERR_INTERNAL:
-	      printf("Error internal\n");
-	      break;
-
-	   default:
-	     printf("Error unknown\n");
-
-	   };
-
+	print_error(perr);
 	return perr;
+
 
 }//main
 
@@ -184,7 +176,7 @@ int main (int argc, char*const* argv)
 static void print_help (void)
 {
   printf ("\
-Usage: %s [options] <PAM user name>\n\
+Usage: %s [options] <user name>\n\
 Test PAM session.\n\
 \n\
 Options:\n\
@@ -197,6 +189,44 @@ Options:\n\
 static void print_version (void)
 {
   printf (PROGRAM_NAME " " PROGRAM_VERSION "\n");
+}
+
+static void print_error(enum pamtest_err perr)
+{
+	switch (perr)
+	{
+	   case PAMTEST_ERR_OK:
+		  printf("Pass\n");
+		  break;
+
+	   case PAMTEST_ERR_START:
+		 printf("Error Starting pam\n");
+		  break;
+
+	   case PAMTEST_ERR_CASE:
+		  printf("Error couldn't run test case\n");
+		  break;
+
+	   case PAMTEST_ERR_OP:
+		  printf("Error couldn't run test case\n");
+		  break;
+
+	   case PAMTEST_ERR_END:
+		  printf("Error pam end faild\n");
+		  break;
+
+	   case PAMTEST_ERR_KEEPHANDLE:
+		  printf("Error internal\n");
+		  break;
+
+	   case PAMTEST_ERR_INTERNAL:
+		  printf("Error internal\n");
+		  break;
+
+	   default:
+		 printf("Error unknown\n");
+
+	};
 }
 
 
