@@ -18,17 +18,17 @@ pam_session_scd_sock='/gnupg/S.scdaemon'
 #check if gpg-agent/scd is running for user
 if [ -f "${pam_session_test_id}" ]
 then
-   if [ -z ! "$1" ]
+   if [ ! -z "$1" ]
    then
       pam_session_uid=$(eval "${pam_session_test_id} --user $1")
       
-      if [ -f "${pam_session_run_dir}${pam_session_gpg_sock}" ]
+      if [ -f "${pam_session_run_dir}${pam_session_uid}${pam_session_gpg_sock}" ]
       then
          printf 'Warning Found Running gpg-agent for user\n'
          printf 'Please stop gpg-agent before testing\n'
       fi
       
-      if [ -f "${pam_session_run_dir}${pam_session_scd_sock}" ]
+      if [ -f "${pam_session_run_dir}${pam_session_uid}${pam_session_scd_sock}" ]
       then
          printf 'Warning Found Running scdaemon for user\n'
          printf 'Please stop scdaemon before testing\n'
