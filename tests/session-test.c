@@ -134,6 +134,7 @@ int main (int argc, char*const* argv)
 	    /* pam function to execute and expected return code */
 	    pam_test(PAMTEST_AUTHENTICATE, PAM_SUCCESS),
 		pam_test(PAMTEST_OPEN_SESSION, PAM_SUCCESS),
+		pam_test(PAMTEST_AUTHENTICATE, PAM_SUCCESS),
 	};
 
 	perr = run_pamtest("poldi",	//service name
@@ -147,23 +148,6 @@ int main (int argc, char*const* argv)
 		print_error(perr);
 		return perr;
 	}
-
-	//attempt to authenticate with no pin/password
-	const char *no_authtoks[] = {
-				buff,//no pin
-		        NULL,
-	};
-	struct pamtest_conv_data no_conv_data = {
-		 .in_echo_off = no_authtoks,
-	};
-	struct pam_testcase auth_tests[] = {
-		/* pam function to execute and expected return code */
-		pam_test(PAMTEST_AUTHENTICATE, PAM_SUCCESS),
-	};
-
-	perr = run_pamtest("poldi",	//service name
-						username,	//username
-						&no_conv_data, auth_tests);	//conversation data and array of tests
 
 	print_error(perr);
 	return perr;
