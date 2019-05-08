@@ -44,10 +44,6 @@ int main (int argc, char*const* argv)
 		print_help();
 		return 1;
 	}
-	else
-	{
-
-	}
 
 	while(1)
 	{
@@ -182,9 +178,7 @@ int main (int argc, char*const* argv)
 
 	   };
 
-	//test_scd_connect(username, loghandle, NULL);
-
-	return 0;
+	return perr;
 
 }//main
 
@@ -207,28 +201,4 @@ static void print_version (void)
   printf (PROGRAM_NAME " " PROGRAM_VERSION "\n");
 }
 
-//void test_scd_connect(const char *username, log_handle_t loghandle, pam_handle_t *pam_handle)
-//{
-//	gpg_error_t err = 0;
-//
-//	err = log_set_backend_stream (loghandle, stderr);
-//	assert (!err);
-//
-//	scd_context_t scd_ctx;
-//	int use_agent = 2;
-//
-//	struct passwd pwd, *result;
-//	char *buf = NULL;
-//	size_t bufsize;
-//
-//	bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-//	if (bufsize == -1)
-//	{
-//		bufsize = 16384;
-//	}
-//
-//	//allocate and get users passwd strcut
-//	buf = (char*) malloc(bufsize);
-//	ret = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
-//}
 
