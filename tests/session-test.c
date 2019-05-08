@@ -152,7 +152,7 @@ int main (int argc, char*const* argv)
 
 	//attempt to authenticate with no pin/password
 	const char *no_authtoks[] = {
-				NULL,//no pin
+				"NoPIN",//no pin
 		        NULL,
 	};
 	struct pamtest_conv_data no_conv_data = {
