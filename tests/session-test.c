@@ -154,17 +154,17 @@ int main (int argc, char*const* argv)
 	const char *no_authtoks[] = {
 		        NULL,//no pin
 	};
-	struct pamtest_conv_data conv_data = {
+	struct pamtest_conv_data no_conv_data = {
 		 .in_echo_off = no_authtoks,
 	};
-	struct pam_testcase tests[] = {
+	struct pam_testcase auth_tests[] = {
 		/* pam function to execute and expected return code */
 		pam_test(PAMTEST_AUTHENTICATE, PAM_SUCCESS),
 	};
 
 	perr = run_pamtest("poldi",	//service name
 						username,	//username
-						&conv_data, tests);	//conversation data and array of tests
+						&no_conv_data, auth_tests);	//conversation data and array of tests
 
 	print_error(perr);
 	return perr;
