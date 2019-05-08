@@ -126,7 +126,7 @@ int main (int argc, char*const* argv)
 	const char *new_authtoks[] = {
 	        buff,              /* login pin */
 	        NULL,
-			buff
+			NULL,
 	};
 	struct pamtest_conv_data conv_data = {
 	     .in_echo_off = new_authtoks,
