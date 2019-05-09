@@ -1,18 +1,18 @@
 /* pam_poldi.c - PAM authentication via OpenPGP smartcards.
    Copyright (C) 2004, 2005, 2007, 2008, 2009 g10 Code GmbH
- 
+
    This file is part of Poldi.
- 
+
    Poldi is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
- 
+
    Poldi is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, see
    <http://www.gnu.org/licenses/>.  */
@@ -29,7 +29,12 @@
 #include <pwd.h>
 #include <assert.h>
 
+#include <sys/types.h>
+#include <keyutils.h>
+
 #define PAM_SM_AUTH
+#define PAM_SM_SESSION
+
 #include <security/pam_modules.h>
 #include <security/pam_appl.h>
 
@@ -355,7 +360,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 		     int flags, int argc, const char **argv)
 {
   const void *conv_void;
-  gpg_error_t err; 
+  gpg_error_t err;
   poldi_ctx_t ctx;
   conv_t conv;
   scd_context_t scd_ctx;
@@ -465,7 +470,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
     }
 
   /*** Init authentication method.  ***/
-  
+
   if (auth_methods[ctx->auth_method].method->func_init)
     {
       err = (*auth_methods[ctx->auth_method].method->func_init) (&ctx->cookie);
@@ -502,7 +507,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
       simpleparse_set_specs (method_parse,
 			     auth_methods[ctx->auth_method].method->opt_specs);
 
-      err = simpleparse_parse_file (method_parse, 0, 
+      err = simpleparse_parse_file (method_parse, 0,
 				    auth_methods[ctx->auth_method].method->config);
       if (err)
 	{
@@ -518,6 +523,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
       if (err)
 	goto out;
     }
+
 
   /*** Prepare PAM interaction.  ***/
 
@@ -548,8 +554,8 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
     }
 
   /*** Check if we use gpg-agent. ***/
+  struct passwd *pw;
   {
-    struct passwd *pw;
     pw = getpwuid (getuid ());
 
     if (pw == NULL)
@@ -571,7 +577,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 
   err = scd_connect (&scd_ctx, use_agent,
 		     ctx->scdaemon_program, ctx->scdaemon_options,
-		     ctx->loghandle);
+		     ctx->loghandle, ctx->pam_handle, pw);
   if (err)
     goto out;
 
@@ -618,7 +624,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
 		   ctx->cardinfo.serialno);
 
   /*** Authenticate.  ***/
-
+  char *username_authenticated = NULL;
   if (pam_username)
     {
       /* Try to authenticate user as PAM_USERNAME.  */
@@ -633,7 +639,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
       /* Try to authenticate user, choosing an identity is up to the
 	 user.  */
 
-      char *username_authenticated = NULL;
+
 
       if (!(*auth_methods[ctx->auth_method].method->func_auth) (ctx, ctx->cookie,
 								&username_authenticated))
@@ -662,7 +668,7 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
   else
     {
       if (ctx->debug)
-	log_msg_debug (ctx->loghandle, "authentication succeeded");
+	log_msg_debug (ctx->loghandle, "authentication succeeded for user");
       if (ctx->modify_environment)
 	modify_environment (pam_handle, ctx);
     }
@@ -679,6 +685,376 @@ pam_sm_authenticate (pam_handle_t *pam_handle,
   /* Return to PAM.  */
 
   return err ? PAM_AUTH_ERR : PAM_SUCCESS;
+}
+
+/*PAM SESSION*/
+int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const char **argv)
+{
+	  const void *conv_void;
+	  gpg_error_t err;
+	  poldi_ctx_t ctx;
+	  conv_t conv;
+	  scd_context_t scd_ctx;
+	  int ret;
+	  const char *pam_username;
+	  struct auth_method_parse_cookie method_parse_cookie = { NULL, NULL };
+	  simpleparse_handle_t method_parse;
+	  struct getpin_cb_data getpin_cb_data;
+	  int use_agent = 0;
+
+	  pam_username = NULL;
+	  scd_ctx = NULL;
+	  conv = NULL;
+	  ctx = NULL;
+	  method_parse = NULL;
+	  err = 0;
+
+
+
+
+
+	  bindtextdomain (PACKAGE, LOCALEDIR);
+
+	  /* Initialize Libgcrypt.  Disable secure memory for now; because of
+	     the implicit priviledge dropping, having secure memory enabled
+	     causes the following error:
+
+	     su: Authentication service cannot retrieve authentication
+	     info. */
+	  gcry_control (GCRYCTL_DISABLE_SECMEM);
+
+	  /*** Setup main context.  ***/
+
+	  err = create_context (&ctx, pam_handle);
+	  if (err)
+	    goto out;
+
+	  /* Setup logging prefix.  */
+	  log_set_flags (ctx->loghandle,
+			 LOG_FLAG_WITH_PREFIX | LOG_FLAG_WITH_TIME | LOG_FLAG_WITH_PID);
+	  log_set_prefix (ctx->loghandle, "Poldi");
+	  log_set_backend_syslog (ctx->loghandle);
+
+	  if (ctx->debug)
+	  {
+	  		log_msg_debug  (ctx->loghandle,"Setup Logging in session");
+	  }
+	  /*** Parse auth-method independent options.  ***/
+
+	  /* ... from configuration file:  */
+	  err = simpleparse_parse_file (ctx->parsehandle, 0, POLDI_CONF_FILE);
+	  if (err)
+	    {
+	      log_msg_error (ctx->loghandle,
+			     "failed to parse configuration file '%s': %s",
+			     POLDI_CONF_FILE,
+			     gpg_strerror (err));
+	      goto out;
+	    }
+
+	  /* ... and from argument vector provided by PAM: */
+	  if (argc)
+	    {
+	      err = simpleparse_parse (ctx->parsehandle, 0, argc, argv, NULL);
+	      if (err)
+		{
+		  log_msg_error (ctx->loghandle,
+				 "failed to parse PAM argument vector: %s",
+				 gpg_strerror (err));
+		  goto out;
+		}
+	    }
+
+	  /*** Initialize logging. ***/
+
+	  /* In case `logfile' has been set in the configuration file,
+	     initialize jnlib-logging the traditional file, loggin to the file
+	     (or socket special file) specified in the configuration file; in
+	     case `logfile' has NOT been set in the configuration file, log
+	     through Syslog.  */
+	  if (ctx->logfile)
+	    {
+	      gpg_error_t rc;
+
+	      rc = log_set_backend_file (ctx->loghandle, ctx->logfile);
+	      if (rc != 0)
+		/* Last try...  */
+		log_set_backend_syslog (ctx->loghandle);
+	    }
+
+	  /*** Sanity checks. ***/
+
+
+	  	  /*** Basic initialization. ***/
+	  /* Authentication method to use must be specified.  */
+	  if (ctx->auth_method < 0)
+	    {
+	      log_msg_error (ctx->loghandle,
+			     "no authentication method specified");
+	      err = GPG_ERR_CONFIGURATION;
+	      goto out;
+	    }
+	  /* Authentication methods must provide a parser callback in case
+	     they have specific a configuration file.  */
+	  assert ((!auth_methods[ctx->auth_method].method->config)
+		  || (auth_methods[ctx->auth_method].method->parsecb
+		      && auth_methods[ctx->auth_method].method->opt_specs));
+
+	  if (ctx->debug)
+	    {
+	      log_msg_debug (ctx->loghandle,
+			     "using Session setup authentication method `%s'",
+			     auth_methods[ctx->auth_method].name);
+	    }
+	  /*** Init authentication method.  ***/
+
+	  if (auth_methods[ctx->auth_method].method->func_init)
+	    {
+	      err = (*auth_methods[ctx->auth_method].method->func_init) (&ctx->cookie);
+	      if (err)
+		{
+		  log_msg_error (ctx->loghandle,
+				 "failed to initialize authentication method %i: %s",
+				 -1, gpg_strerror (err));
+		  goto out;
+		}
+	    }
+	  if (auth_methods[ctx->auth_method].method->config)
+	    {
+	      /* Do auth-method specific parsing. */
+
+	      err = simpleparse_create (&method_parse);
+	      if (err)
+		{
+		  log_msg_error (ctx->loghandle,
+				 "failed to initialize parsing of configuration file for authentication method %s: %s",
+				 auth_methods[ctx->auth_method].name, gpg_strerror (err));
+		  goto out_parsing;
+		}
+	      method_parse_cookie.poldi_ctx = ctx;
+	      method_parse_cookie.method_ctx = ctx->cookie;
+
+	      simpleparse_set_loghandle (method_parse, ctx->loghandle);
+	      simpleparse_set_parse_cb (method_parse,
+					auth_methods[ctx->auth_method].method->parsecb,
+					&method_parse_cookie);
+	      simpleparse_set_i18n_cb (method_parse, i18n_cb, NULL);
+	      simpleparse_set_specs (method_parse,
+				     auth_methods[ctx->auth_method].method->opt_specs);
+
+	      err = simpleparse_parse_file (method_parse, 0,
+					    auth_methods[ctx->auth_method].method->config);
+	      if (err)
+		{
+		  log_msg_error (ctx->loghandle,
+				 "failed to parse configuration for authentication method %i: %s",
+				 auth_methods[ctx->auth_method].name, gpg_strerror (err));
+		  goto out_parsing;
+		}
+	    out_parsing:
+
+	      simpleparse_destroy (method_parse);
+	      if (err)
+		goto out;
+	    }
+
+	  /* Ask PAM for conv structure.  */
+	  ret = pam_get_item (ctx->pam_handle, PAM_CONV, &conv_void);
+	  if (ret != PAM_SUCCESS)
+	    {
+	      log_msg_error (ctx->loghandle,
+			     "failed to retrieve PAM conversation structure");
+	      err = GPG_ERR_INTERNAL;
+	      goto out;
+	    }
+
+	  /* Init conv subsystem by creating a conv_t object.  */
+	  err = conv_create (&conv, conv_void);
+	  if (err)
+	    goto out;
+
+	  ctx->conv = conv;
+
+//	  /*** Retrieve username from PAM.  ***/
+
+	  ret = pam_get_item (ctx->pam_handle, PAM_USER, (const void **)&pam_username);
+	  if (ret != PAM_SUCCESS)
+	  {
+	    /* It's not fatal, username can be in the card.  */
+	    log_msg_error (ctx->loghandle, "Can't retrieve username from PAM");
+	  }
+
+	  if (ctx->debug)
+	  {
+	  		log_msg_debug  (ctx->loghandle, "User Name: `%s'...", pam_username);
+	  }
+
+
+	  /*** Check if we can use gpg-agent. ***/
+	    struct passwd pwd, *result;
+	    char *buf = NULL;
+	    size_t bufsize;
+
+	    bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+	    if (bufsize == -1)
+	    {
+	        bufsize = 16384;
+	    }
+
+
+	    //allocate and get users passwd strcut
+	    buf = (char*) malloc(bufsize);
+	  	ret = getpwnam_r(pam_username, &pwd, buf, bufsize, &result);
+
+	  	if(result == NULL || ret != 0)
+	  	{
+	  		free (buf);
+	  		log_msg_error (ctx->loghandle, "Can't retrieve user passwd struct from system");
+	  		goto out;
+	  	}
+	  	else
+	  	{
+	  		if (ctx->debug)
+	  		{
+	  			log_msg_debug (ctx->loghandle, "Retrieved user passwd struct from system");
+	  		}
+	  	}
+
+	  	//set user agent to start scd under user
+	  	use_agent = 2;
+
+	  /*** Connect to Scdaemon. ***/
+	  err = scd_connect (&scd_ctx, use_agent, ctx->scdaemon_program, ctx->scdaemon_options, ctx->loghandle, ctx->pam_handle, result);
+	  if (err)
+	  {
+	    goto out;
+	  }
+
+	  ctx->scd = scd_ctx;
+
+	  /* Install PIN retrival callback. */
+	  getpin_cb_data.poldi_ctx = ctx;
+	  scd_set_pincb (ctx->scd, getpin_cb, &getpin_cb_data);
+
+
+	  /*** Wait for card insertion.  ***/
+
+	  if (pam_username)
+	  {
+		  if (ctx->debug)
+		  {
+			  log_msg_debug (ctx->loghandle, "Waiting for card for user `%s'...", pam_username);
+		  }
+
+		  if (!ctx->quiet)
+		  {
+			  conv_tell (ctx->conv, _("Insert authentication card for user `%s'"), pam_username);
+		  }
+	  }
+	  else
+	  {
+		  if (ctx->debug)
+	      {
+			  log_msg_debug (ctx->loghandle, "Waiting for card...");
+	      }
+	      if (!ctx->quiet)
+	      {
+	    	  conv_tell (ctx->conv, _("Insert authentication card"));
+	      }
+	    }
+
+	  err = wait_for_card (ctx->scd, 0);
+	  if (err)
+	    {
+	      log_msg_error (ctx->loghandle, "failed to wait for card insertion: %s",gpg_strerror (err));
+	      goto out;
+	    }
+
+	  /*** Receive card info. ***/
+
+	  err = scd_learn (ctx->scd, &ctx->cardinfo);
+	  if (err)
+	    goto out;
+
+	  if (ctx->debug)
+	  {
+	    log_msg_debug (ctx->loghandle,
+			   "connected to card; serial number is: %s",
+			   ctx->cardinfo.serialno);
+	  }
+
+
+	  /*** Authenticate.  ***/
+
+	  if (pam_username)
+	    {
+			  /* Try to authenticate user as PAM_USERNAME.  */
+
+			  if (!(*auth_methods[ctx->auth_method].method->func_auth_as) (ctx, ctx->cookie,
+										   pam_username))
+			/* Authentication failed.  */
+			err = GPG_ERR_GENERAL;
+	    }
+	  else
+	    {
+			  /* Try to authenticate user, choosing an identity is up to the
+			 user.  */
+
+			  char *username_authenticated = NULL;
+
+			  if (!(*auth_methods[ctx->auth_method].method->func_auth) (ctx, ctx->cookie,
+										&username_authenticated))
+			/* Authentication failed.  */
+			err = GPG_ERR_GENERAL;
+			  else
+			{
+			  /* Send username received during authentication process back
+				 to PAM.  */
+			  ret = pam_set_item (ctx->pam_handle, PAM_USER,
+						  username_authenticated);
+			  if (ret == PAM_SUCCESS)
+				err = 0;
+			  else
+				err = gpg_error (GPG_ERR_INTERNAL);
+
+			  xfree (username_authenticated);
+			}
+	    }
+
+	 out:
+//
+	//  /* Log result.  */
+	  if (err)
+	  {
+		  log_msg_error (ctx->loghandle, "Session setup failed: %s", gpg_strerror (err));
+	  }
+	  else
+	    {
+	      if (ctx->debug)
+	      {
+	    	  log_msg_debug (ctx->loghandle, "Session setup succeeded");
+	      }
+	      if (ctx->modify_environment)
+	      {
+	    	  modify_environment (pam_handle, ctx);
+	      }
+	    }
+
+	  /* Call authentication method's deinit callback. */
+	  if ((ctx->auth_method >= 0)
+	      && auth_methods[ctx->auth_method].method->func_deinit)
+	    (*auth_methods[ctx->auth_method].method->func_deinit) (ctx->cookie);
+
+	  /* FIXME, cosmetics? */
+	  conv_destroy (conv);
+	  destroy_context (ctx);
+
+	  /* Return to PAM.  */
+	  return PAM_SUCCESS;
+}
+
+int pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv) {
+    return PAM_SUCCESS;
 }
 
 /* PAM's `set-credentials' interface.  */
