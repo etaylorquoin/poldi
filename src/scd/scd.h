@@ -90,7 +90,6 @@ void scd_release_cardinfo (struct scd_cardinfo cardinfo);
    *R_BUF, *R_BUFLEN will hold the length of the signature. */
 gpg_error_t scd_pksign (scd_context_t ctx,
 			const char *keyid,
-      key_types key_type,
 			const unsigned char *indata, size_t indatalen,
 			unsigned char **r_buf, size_t *r_buflen);
 
