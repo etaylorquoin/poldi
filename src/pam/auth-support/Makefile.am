@@ -33,7 +33,7 @@ PAM_MODULE_DIRECTORY = @PAM_MODULE_DIRECTORY@
 
 AM_CFLAGS = \
 	-Wall -fPIC \
-	 $(LIBGCRYPT_CFLAGS) $(GPG_ERROR_CFLAGS)
+	 $(LIBGCRYPT_CFLAGS) $(GPG_ERROR_CFLAGS) -lkeyutils
 
 noinst_LIBRARIES = libpam-poldi-auth-support.a
 
