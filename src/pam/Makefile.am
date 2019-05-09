@@ -37,7 +37,8 @@ AM_CFLAGS = \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/util \
 	$(GPG_ERROR_CFLAGS) \
-	$(LIBGCRYPT_CFLAGS)
+	$(LIBGCRYPT_CFLAGS) \
+	-lkeyutils
 
 AUTH_METHODS =
 AUTH_METHODS_LIBS =
@@ -65,7 +66,7 @@ pam_poldi.so: libpam_poldi.a $(AUTH_METHODS_LIBS) auth-support/libpam-poldi-auth
 		libpam_poldi.a \
 		$(AUTH_METHODS_LIBS) auth-support/libpam-poldi-auth-support.a \
 		../scd/libscd_shared.a ../util/libpoldi-util_shared.a ../assuan/libassuan.a \
-		$(LIBGCRYPT_LIBS) $(KSBA_LIBS)
+		$(LIBGCRYPT_LIBS) $(KSBA_LIBS) -lkeyutils
 
 all-local: pam_poldi.so
 

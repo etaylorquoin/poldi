@@ -332,7 +332,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/pam/auth-support \
 	-DGNUPG_LIBEXECDIR="\"$(libexecdir)\""
 AM_CFLAGS = \
 	-Wall -fPIC \
-	 $(LIBGCRYPT_CFLAGS) $(GPG_ERROR_CFLAGS)
+	 $(LIBGCRYPT_CFLAGS) $(GPG_ERROR_CFLAGS) -lkeyutils
 
 noinst_LIBRARIES = libpam-poldi-auth-support.a
 libpam_poldi_auth_support_a_SOURCES = \

@@ -27,7 +27,6 @@
 #include <security/pam_appl.h>
 
 #include "util/simplelog.h"
-#include "util/key-types.h"
 
 struct scd_context;
 
