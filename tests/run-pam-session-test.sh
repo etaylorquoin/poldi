@@ -9,13 +9,47 @@ pam_session_test_ls='/usr/bin/ls'
 
 session_bin='session-test'
 
+#set debug level
+# 0 = Error
+# 1 = Warning
+# 2 = Debug
+# 3 = Trace
+pam_session_debuglevel=1
+
 #preloader command with options
-preloader_cmd='LD_PRELOAD=libpam_wrapper.so PAM_WRAPPER=1 PAM_WRAPPER_USE_SYSLOG=0 PAM_WRAPPER_DEBUGLEVEL=2 PAM_WRAPPER_SERVICE_DIR=./services ./session-test'
+preloader_cmd="LD_PRELOAD=libpam_wrapper.so PAM_WRAPPER=1 PAM_WRAPPER_USE_SYSLOG=0 PAM_WRAPPER_DEBUGLEVEL=${pam_session_debuglevel} PAM_WRAPPER_SERVICE_DIR=./services ./${session_bin}"
 
 #paths
 pam_session_run_dir='/run/user/'
 pam_session_gpg_sock='/gnupg/S.gpg-agent'
 pam_session_scd_sock='/gnupg/S.scdaemon'
+
+pam_check_depd() {
+   
+   #check for id command
+   if [ ! -f "${pam_session_test_id}" ]
+   then
+      printf 'Error id command required\n'
+      return 1
+   fi
+   
+   #check for ls command
+   if [ ! -f "${pam_session_test_ls}" ]
+   then
+      printf 'Error ls command required\n'
+      return 1
+   fi
+   
+   return 0
+   
+}
+pam_session_test_main () {
+
+#check for dependices
+if ! pam_check_depd
+then
+   return 1
+fi
 
 #check if gpg-agent/scd is running for user
 if [ -f "${pam_session_test_id}" ]
@@ -48,3 +82,7 @@ else
    printf 'Error Please compile session-test\n'
 fi
 
+   return 0
+}
+
+pam_session_test_main "$@"
