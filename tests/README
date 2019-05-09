@@ -54,6 +54,9 @@ README for session-test
    to send the SIGTERM signal to any gpg-agent and scdeamon processes
    running under the user.
    
+   You will need to update the path in the ./services/other folder to
+   point to the pam_poldi.so module you are testing.
+   
    session-test is a utility used to test the session component 
    of the poldi module. It requires the libpamtest library found 
    in the libpam-wrapper library and a properly 
