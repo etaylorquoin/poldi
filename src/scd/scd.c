@@ -1,24 +1,25 @@
 /* scd.c - Interface to Scdaemon
    Copyright (C) 2001, 2002, 2005 Free Software Foundation, Inc.
-   Copyright (C) 2007, 2008, 2009 g10code GmbH. 
+   Copyright (C) 2007, 2008, 2009 g10code GmbH.
 
    This file is part of Poldi.
- 
+
    Poldi is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
- 
+
    Poldi is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
- 
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, see
    <http://www.gnu.org/licenses/>.  */
 
 #include <poldi.h>
+#include <security/pam_modules.h>
 
 #include <errno.h>
 #include <stdio.h>
@@ -31,6 +32,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 #include <gpg-error.h>
 #include <gcrypt.h>
@@ -48,7 +50,11 @@
 #define MAX_OPEN_FDS 20
 #endif
 
-
+#define READ_END 0
+#define WRITE_END 1
+
+#define TRUE 1
+#define FALSE 0
 
 /* Initializer objet for struct scd_cardinfo instances.  */
 struct scd_cardinfo scd_cardinfo_null;
@@ -75,7 +81,7 @@ struct learn_parm_s
   void *sinfo_cb_arg;
 };
 
-struct inq_needpin_s 
+struct inq_needpin_s
 {
   scd_context_t ctx;
   int (*getpin_cb)(void *, const char *, char*, size_t);
@@ -214,13 +220,12 @@ restart_scd (scd_context_t ctx)
    zero on success.  */
 gpg_error_t
 scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
-	     const char *scd_options, log_handle_t loghandle)
+	     const char *scd_options, log_handle_t loghandle, pam_handle_t *pam_handle, struct passwd *pw)
 {
   assuan_context_t assuan_ctx;
   scd_context_t ctx;
-  gpg_error_t err;
-
-  assuan_ctx = NULL;
+  gpg_error_t err = 0;
+  int rt_val = 0;
 
   if (fflush (NULL))
     {
@@ -232,13 +237,122 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 
   ctx = xtrymalloc (sizeof (*ctx));
   if (!ctx)
-    return gpg_error_from_syserror ();
-
+  {
+	  return gpg_error_from_syserror ();
+  }
   ctx->assuan_ctx = NULL;
   ctx->flags = 0;
 
+  if (use_agent == 2)
+    {
+	  struct userinfo uinfo;
+	  uinfo.uid=pw->pw_uid;
+	  uinfo.gid=pw->pw_gid;
+	  uinfo.home=pw->pw_dir;
+	  char *scd_socket_name = NULL;
+
+	  const char *cmd[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
+	  int input;
+	  char **env = pam_getenvlist(pam_handle);
+
+	  //runs a command as another user
+	  const int pid = run_as_user(&uinfo, cmd, &input, env);
+
+	  if (env != NULL) {
+	      free(env);
+	  }
+	  if (pid == 0 || input < 0) {
+	      exit(0);
+	  }
+
+	  int fd[2];
+	  size_t maxBuffSize=1024;
+	  char pipe_buff[maxBuffSize];
+
+	  // create pipe descriptors
+	  rt_val = pipe(fd);
+	  if (rt_val == -1)
+	  {
+		  return GPG_ERR_GENERAL;
+	  }
+
+	  int frk_val = fork();
+
+	  if (frk_val != 0)
+	  {
+		  //parent process reading only, close write descriptor
+		  close(fd[1]);
+		  //read data from child
+		  rt_val = read(fd[0], pipe_buff, maxBuffSize);
+		  if (rt_val == -1)
+		  {
+			  return GPG_ERR_GENERAL;
+		  }
+		  //close read
+		  close(fd[0]);
+	  }
+	  else//child process
+	  {
+		  close(fd[0]);
+
+		  //switch to user process
+		  rt_val = setgid(uinfo.gid);
+		  if(rt_val == -1)
+		  {
+			  exit(-1);
+		  }
+
+		  rt_val = setuid(uinfo.uid);
+		  if(rt_val == -1)
+		  {
+			  exit(-1);
+		  }
+
+		  get_scd_socket_from_agent (&scd_socket_name);
+
+		  //close read pipe
+		  if(scd_socket_name != NULL)
+		  {
+			  strcpy(pipe_buff, scd_socket_name);
+		  }
+		  //get gpg socket path
+		  err = write(fd[1], pipe_buff, maxBuffSize);
+		  if(err == -1)
+		  {
+			  exit(-1);
+		  }
+
+		  //close write and exit
+		  close(fd[1]);
+		  exit(0);
+	  }
+	  //wait for child to finish
+	  waitpid(frk_val, &rt_val, 0);
+
+	  //if child exited on error
+	  if(rt_val == -1)
+	  {
+		  return GPG_ERR_GENERAL;
+	  }
+	  scd_socket_name=pipe_buff;
+
+	  //connect to users scdeamon socket
+	  err = assuan_socket_connect (&assuan_ctx, scd_socket_name, 0);
+
+	  if (!err)
+	  {
+		  log_msg_debug (loghandle,
+		   "got scdaemon socket name from users gpg-agent, "
+	  		       "connected to socket '%s'", scd_socket_name);
+	  }
+	  else
+	  {
+		  log_msg_debug (loghandle, "Error getting scdaemon socket during session setup: %s", scd_socket_name);
+	  }
+  }
+
   /* Try using scdaemon under gpg-agent.  */
-  if (use_agent)
+  if (use_agent == 1)
     {
       char *scd_socket_name = NULL;
 
@@ -261,12 +375,14 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   /* If scdaemon under gpg-agent is irrelevant or not available,
    * let Poldi invoke scdaemon.
    */
-  if (!use_agent || err)
+  if ((use_agent==0) || (err && use_agent != 2))
     {
       const char *pgmname;
       const char *argv[5];
       int no_close_list[3];
       int i;
+
+      assuan_ctx = NULL;
 
       if (!scd_path || !*scd_path)
         scd_path = GNUPG_DEFAULT_SCD;
@@ -323,7 +439,9 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
     {
       /* FIXME: is this the best way?  -mo */
       //reset_scd (assuan_ctx);
-      scd_serialno_internal (assuan_ctx, NULL);
+
+	  char *card_sn = NULL;
+      err = scd_serialno_internal (assuan_ctx, &card_sn);
 
       ctx->assuan_ctx = assuan_ctx;
       ctx->flags = 0;
@@ -375,7 +493,7 @@ unescape_status_string (const char *s)
   while (*s)
     {
       if (*s == '%' && s[1] && s[2])
-        { 
+        {
           s++;
           *d = xtoi_2 (s);
           if (!*d)
@@ -391,7 +509,7 @@ unescape_status_string (const char *s)
       else
         *d++ = *s++;
     }
-  *d = 0; 
+  *d = 0;
   return buffer;
 }
 
@@ -490,7 +608,7 @@ learn_status_cb (void *opaque, const char *line)
       else if (no == 3)
         parm->fpr3valid = unhexify_fpr (line, parm->fpr3);
     }
-  
+
   return 0;
 }
 
@@ -605,7 +723,7 @@ membuf_data_cb (void *opaque, const void *buffer, size_t length)
     put_membuf (data, buffer, length);
   return 0;
 }
-  
+
 /* Handle the NEEDPIN inquiry. */
 static int
 inq_needpin (void *opaque, const char *line)
@@ -628,7 +746,7 @@ inq_needpin (void *opaque, const char *line)
       line += 7;
       while (*line == ' ')
         line++;
-      
+
       pinlen = 90;
       pin = xtrymalloc_secure (pinlen);
       if (!pin)
@@ -654,7 +772,7 @@ inq_needpin (void *opaque, const char *line)
       line += 17;
       while (*line == ' ')
         line++;
-      
+
       rc = parm->getpin_cb (parm->getpin_cb_arg, line, NULL, 1);
     }
   else if (!strncmp (line, "DISMISSPINPADPROMPT", 19)
@@ -688,11 +806,12 @@ inq_needpin (void *opaque, const char *line)
    the PIN, GETPIN_CB_ARG is passed as opaque argument to
    GETPIN_CB. INDATA/INDATALEN is the input for the signature
    function.  The signature created is written into newly allocated
-   memory in *R_BUF, *R_BUFLEN will hold the length of the
+   memory in *R_BUF, *S_BUF, *R_BUFLEN, S_BUFLEN will hold the length of the
    signature. */
 gpg_error_t
 scd_pksign (scd_context_t ctx,
 	    const char *keyid,
+      key_types key_type,
 	    const unsigned char *indata, size_t indatalen,
 	    unsigned char **r_buf, size_t *r_buflen)
 {
@@ -703,6 +822,7 @@ scd_pksign (scd_context_t ctx,
   size_t len;
   unsigned char *sigbuf;
   size_t sigbuflen;
+  const char * hashAlgo;
 
   *r_buf = NULL;
   *r_buflen = 0;
@@ -735,9 +855,25 @@ scd_pksign (scd_context_t ctx,
   inqparm.getpin_cb = ctx->pincb;
   inqparm.getpin_cb_arg = ctx->pincb_cookie;
 
-  /* Go, sign it. */
 
-  snprintf (line, DIM(line)-1, "PKSIGN %s", keyid);
+  //set hash type based on
+  switch (key_type)
+  {
+    case kType_rsa:
+      hashAlgo = "--hash=sha256";
+      break;
+
+    case kType_ecc_Ed25519:
+      hashAlgo = "";//default is sha512, setting that here causes scd to generate an invalid SIG
+      break;
+
+    default:
+      rc = -1;
+      goto out;
+  }//switch
+
+  /* Go, sign it. */
+  snprintf (line, DIM(line)-1, "PKSIGN %s %s",hashAlgo, keyid);
   line[DIM(line)-1] = 0;
   rc = assuan_transact (ctx->assuan_ctx, line,
                         membuf_data_cb, &data,
@@ -760,7 +896,7 @@ scd_pksign (scd_context_t ctx,
     }
 
   memcpy (p, sigbuf, sigbuflen);
-  
+
  out:
 
   xfree (get_membuf (&data, &len));
@@ -816,7 +952,7 @@ scd_readkey (scd_context_t ctx,
  out:
 
   xfree (buffer);
-    
+
   return rc;
 }
 
@@ -872,4 +1008,65 @@ scd_getinfo (scd_context_t ctx, const char *what, char **result)
   return rc;
 }
 
+
+int run_as_user(const struct userinfo *user, const char * const cmd[], int *input, char **env) {
+    int inp[2] = {-1, -1};
+    int pid;
+    int dev_null;
+
+    if (pipe(inp) < 0) {
+        *input = -1;
+        return 0;
+    }
+    *input = inp[WRITE_END];
+
+    switch (pid = fork()) {
+    case -1:
+        close_safe(inp[READ_END]);
+        close_safe(inp[WRITE_END]);
+        *input = -1;
+        return FALSE;
+
+    case 0:
+        break;
+
+    default:
+        close_safe(inp[READ_END]);
+        return pid;
+    }
+
+    /* We're in the child process now */
+
+    if (dup2(inp[READ_END], STDIN_FILENO) < 0) {
+        exit(EXIT_FAILURE);
+    }
+    close_safe(inp[READ_END]);
+    close_safe(inp[WRITE_END]);
+
+    if ((dev_null = open("/dev/null", O_WRONLY)) != -1) {
+        dup2(dev_null, STDOUT_FILENO);
+        dup2(dev_null, STDERR_FILENO);
+        close(dev_null);
+    }
+
+    if (seteuid(getuid()) < 0 || setegid(getgid()) < 0 ||
+        setgid(user->gid) < 0 || setuid(user->uid) < 0 ||
+        setegid(user->gid) < 0 || seteuid(user->uid) < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    if (env != NULL) {
+        execve(cmd[0], (char * const *) cmd, env);
+    } else {
+        execv(cmd[0], (char * const *) cmd);
+    }
+    exit(EXIT_FAILURE);
+}
+
+void close_safe(int fd)
+{
+    if (fd != -1) {
+        close(fd);
+    }
+}
 /* END */

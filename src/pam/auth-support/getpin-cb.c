@@ -18,6 +18,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <poldi.h>
+#include <security/pam_modules.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +32,9 @@
 #include <pwd.h>
 #include <dirent.h>
 #include <time.h>
+
+#include <sys/types.h>
+#include <keyutils.h>
 
 #include <gcrypt.h>
 
@@ -58,35 +62,85 @@ query_user (poldi_ctx_t ctx, const char *info, char *pin, size_t pin_size)
   buffer = NULL;
   rc = 0;
 
-  while (1)			/* Loop until well-formed PIN retrieved. */
-    {
-      /* Retrieve PIN through PAM.  */
-      rc = conv_ask (ctx->conv, 1, &buffer, info);
-      if (rc)
-	goto out;
+  //if pin is cached in kernel use it
+  key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_PROCESS_KEYRING);
 
-      /* Do some basic checks on the entered PIN. FIXME: hard-coded
-	 values! Is this really the correct place for these checks?
-	 Shouldn't they be done in scdaemon itself?  -mo */
+  if (sn != -1)
+  {
+	  char *rtSecret = NULL;
+	  long rt_val = keyctl_read_alloc(sn, (void **) &rtSecret);
 
-      if (strlen (buffer) < 6)	/* FIXME? is it really minimum of 6 bytes? */
-	{
-	  log_msg_error (ctx->loghandle, "PIN too short");
-	  conv_tell (ctx->conv, "%s", _("PIN too short"));
+	  if((rtSecret != NULL) && (rt_val != -1))
+	  {
+		  if (strlen (rtSecret) >= pin_size)
+		  {
+			  log_msg_error (ctx->loghandle, "PIN too long for buffer!");
+			  rc = gpg_error (GPG_ERR_INV_DATA); /* ? */
+			  goto out;
+		  }
+
+		  strncpy (pin, rtSecret, pin_size - 1);
+		  pin[pin_size-1] = 0;
+
+		  //overwrite password
+		  if( rtSecret != NULL)
+		  {
+			  wipestr(rtSecret);
+		  }
+		  //revoke key
+		  rt_val = keyctl_revoke(sn);
+		  if(rt_val == -1)
+		  {
+			  log_msg_error (ctx->loghandle, "Error Revoking pin from kernel key manager");
+		  }
 	}
-      else
-	break;
-    }
+	  else
+	  {
+		  log_msg_error (ctx->loghandle, "Kernel key manager returned NULL");
+		  rc = gpg_error (GPG_ERR_INV_DATA); /* ? */
+		  goto out;
+	  }
+  }
+  else//request pin from user
+  {
+	  while (1)			/* Loop until well-formed PIN retrieved. */
+		{
+		  /* Retrieve PIN through PAM.  */
+		  rc = conv_ask (ctx->conv, 1, &buffer, info);
+		  if (rc)
+		goto out;
 
-  if (strlen (buffer) >= pin_size)
-    {
-      log_msg_error (ctx->loghandle, "PIN too long for buffer!");
-      rc = gpg_error (GPG_ERR_INV_DATA); /* ? */
-      goto out;
-    }
+		  /* Do some basic checks on the entered PIN. FIXME: hard-coded
+		 values! Is this really the correct place for these checks?
+		 Shouldn't they be done in scdaemon itself?  -mo */
 
-  strncpy (pin, buffer, pin_size - 1);
-  pin[pin_size-1] = 0;
+		if (strlen (buffer) < 6)	/* FIXME? is it really minimum of 6 bytes? */
+		{
+		  log_msg_error (ctx->loghandle, "PIN too short");
+		  conv_tell (ctx->conv, "%s", _("PIN too short"));
+		}
+		  else
+		break;
+		}
+
+	  if (strlen (buffer) >= pin_size)
+		{
+		  log_msg_error (ctx->loghandle, "PIN too long for buffer!");
+		  rc = gpg_error (GPG_ERR_INV_DATA); /* ? */
+		  goto out;
+		}
+
+	  strncpy (pin, buffer, pin_size - 1);
+	  pin[pin_size-1] = 0;
+
+	  //save key to kernel key manager
+	  long rt_val = add_key("user", "pam-poldi-key", buffer, strlen(buffer), KEY_SPEC_PROCESS_KEYRING);
+	  if(rt_val == -1)
+	  {
+		  log_msg_error (ctx->loghandle, "Error saving pin to the kernel key manager: %lx", rt_val);
+		  rc = gpg_error (GPG_ERR_INV_DATA);
+	  }
+  }
 
  out:
 
