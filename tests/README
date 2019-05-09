@@ -68,8 +68,8 @@ README for session-test
    
    session-test sets the following exit values to indicate run status:
    
-    PAMTEST_ERR_OK:           0
-    PAMTEST_ERR_START:        1
+	PAMTEST_ERR_OK:           0
+	PAMTEST_ERR_START:        1
 	PAMTEST_ERR_CASE:         2
 	PAMTEST_ERR_OP:           3
 	PAMTEST_ERR_END:          4
