@@ -97,7 +97,8 @@ section entitled ``Copying''.
 
 Poldi is a PAM module implementing challenge/response based
 authentication through the OpenPGP
-smartcard@footnote{http://www.g10code.de/p-card.html}.  It makes use of
+smartcard@footnote{http://www.g10code.de/p-card.html}.  It also supports
+session setup for OpenPgp to keep the card unlocked after login. It makes use of
 several GnuPG components@footnote{Libgcrypt, Assuan, Scdaemon, Dirmngr}
 and currently supports two authentication methods:
 
@@ -557,7 +558,8 @@ Now, things should be ready for trying authentication.
 
 Authentication through Poldi should be tested before activating the
 module.  For this purpose, the Poldi package includes a simple program
-named ``pam-test'', which is suitable for testing PAM authentication.
+named ``pam-test'', which is suitable for testing PAM authentication and
+a program named session-test for testing the session functionality.
 
 @menu
 * The pam-test program::
