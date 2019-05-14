@@ -305,8 +305,8 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  strcpy(gpg_connect_agent, gpg_bin_dir);
 	  strcat(gpg_connect_agent, "gpg-connect-agent");
 
-	  const char *cmd_start_gpg[] = {gpg_connect_agent, "learn", "/bye", NULL};
-	  const char *cmd_start_gpg_tty[] = {gpg_connect_agent, "UPDATESTARTUPTTY", "/bye", NULL};
+	  const char *cmd_start_gpg[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
+	  const char *cmd_start_gpg_tty[] = {"/usr/bin/gpg-connect-agent", "UPDATESTARTUPTTY", "/bye", NULL};
 	  int input;
 	  char **env = pam_getenvlist(pam_handle);
 
@@ -315,15 +315,15 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  waitpid(-1, &rt_val, 0);
 	  if (input < 0 || rt_val == EXIT_FAILURE)
 	  {
-		  exit(0);
+		  return GPG_ERR_GENERAL;
 	  }
 
 	  //setup gpg tty under user, needed for using gpg-agent ssh with pinentry-qt
 	  run_as_user(pw, cmd_start_gpg_tty, &input, env);
 	  waitpid(-1, &rt_val, 0);
-	  if (input < 0)
+	  if (input < 0 || rt_val == EXIT_FAILURE)
 	  {
-		  exit(0);
+		  return GPG_ERR_GENERAL;
 	  }
 
 	  if (env != NULL)
