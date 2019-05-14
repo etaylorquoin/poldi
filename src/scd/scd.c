@@ -245,10 +245,10 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 
   if (use_agent == 2)
     {
-	  struct userinfo uinfo;
-	  uinfo.uid=pw->pw_uid;
-	  uinfo.gid=pw->pw_gid;
-	  uinfo.home=pw->pw_dir;
+//	  struct userinfo uinfo;
+//	  uinfo.uid=pw->pw_uid;
+//	  uinfo.gid=pw->pw_gid;
+//	  uinfo.home=pw->pw_dir;
 	  char *scd_socket_name = NULL;
 
 	  const char *cmd[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
@@ -256,7 +256,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  char **env = pam_getenvlist(pam_handle);
 
 	  //runs a command as another user
-	  const int pid = run_as_user(&uinfo, cmd, &input, env);
+	  const int pid = run_as_user(pw, cmd, &input, env);
 
 	  if (env != NULL) {
 	      free(env);
@@ -281,7 +281,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  if (frk_val != 0)
 	  {
 		  //parent process reading only, close write descriptor
-		  close(fd[1]);
+		  close_safe(fd[1]);
 		  //read data from child
 		  rt_val = read(fd[0], pipe_buff, maxBuffSize);
 		  if (rt_val == -1)
@@ -289,20 +289,20 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 			  return GPG_ERR_GENERAL;
 		  }
 		  //close read
-		  close(fd[0]);
+		  close_safe(fd[0]);
 	  }
 	  else//child process
 	  {
-		  close(fd[0]);
+		  close_safe(fd[0]);
 
 		  //switch to user process
-		  rt_val = setgid(uinfo.gid);
+		  rt_val = setgid(pw->pw_gid);
 		  if(rt_val == -1)
 		  {
 			  exit(-1);
 		  }
 
-		  rt_val = setuid(uinfo.uid);
+		  rt_val = setuid(pw->pw_uid);
 		  if(rt_val == -1)
 		  {
 			  exit(-1);
@@ -323,7 +323,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 		  }
 
 		  //close write and exit
-		  close(fd[1]);
+		  close_safe(fd[1]);
 		  exit(0);
 	  }
 	  //wait for child to finish
@@ -1009,18 +1009,21 @@ scd_getinfo (scd_context_t ctx, const char *what, char **result)
 }
 
 
-int run_as_user(const struct userinfo *user, const char * const cmd[], int *input, char **env) {
+int run_as_user(const struct passwd *user, const char * const cmd[], int *input, char **env)
+{
     int inp[2] = {-1, -1};
     int pid;
     int dev_null;
 
-    if (pipe(inp) < 0) {
+    if (pipe(inp) < 0)
+    {
         *input = -1;
         return 0;
     }
     *input = inp[WRITE_END];
 
-    switch (pid = fork()) {
+    switch (pid = fork())
+    {
     case -1:
         close_safe(inp[READ_END]);
         close_safe(inp[WRITE_END]);
@@ -1037,35 +1040,41 @@ int run_as_user(const struct userinfo *user, const char * const cmd[], int *inpu
 
     /* We're in the child process now */
 
-    if (dup2(inp[READ_END], STDIN_FILENO) < 0) {
+    if (dup2(inp[READ_END], STDIN_FILENO) < 0)
+    {
         exit(EXIT_FAILURE);
     }
+
     close_safe(inp[READ_END]);
     close_safe(inp[WRITE_END]);
 
-    if ((dev_null = open("/dev/null", O_WRONLY)) != -1) {
+    if ((dev_null = open("/dev/null", O_WRONLY)) != -1)
+    {
         dup2(dev_null, STDOUT_FILENO);
         dup2(dev_null, STDERR_FILENO);
         close(dev_null);
     }
 
     if (seteuid(getuid()) < 0 || setegid(getgid()) < 0 ||
-        setgid(user->gid) < 0 || setuid(user->uid) < 0 ||
-        setegid(user->gid) < 0 || seteuid(user->uid) < 0) {
+        setgid(user->pw_gid) < 0 || setuid(user->pw_uid) < 0 ||
+        setegid(user->pw_gid) < 0 || seteuid(user->pw_gid) < 0)
+    {
         exit(EXIT_FAILURE);
     }
 
-    if (env != NULL) {
+    if (env != NULL)
+    {
         execve(cmd[0], (char * const *) cmd, env);
     } else {
         execv(cmd[0], (char * const *) cmd);
     }
-    exit(EXIT_FAILURE);
+    exit(EXIT_SUCCESS);
 }
 
 void close_safe(int fd)
 {
-    if (fd != -1) {
+    if (fd != NULL)
+    {
         close(fd);
     }
 }
