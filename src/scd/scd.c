@@ -303,10 +303,10 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  }
 
 	  strcpy(gpg_connect_agent, gpg_bin_dir);
-	  strcat(gpg_connect_agent, "gpg-connect-agent");
+	  strcat(gpg_connect_agent, "/gpg-connect-agent");
 
-	  const char *cmd_start_gpg[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
-	  const char *cmd_start_gpg_tty[] = {"/usr/bin/gpg-connect-agent", "UPDATESTARTUPTTY", "/bye", NULL};
+	  const char *cmd_start_gpg[] = {gpg_connect_agent, "learn", "/bye", NULL};
+	  const char *cmd_start_gpg_tty[] = {gpg_connect_agent, "UPDATESTARTUPTTY", "/bye", NULL};
 	  int input;
 	  char **env = pam_getenvlist(pam_handle);
 
