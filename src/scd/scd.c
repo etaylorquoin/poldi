@@ -141,6 +141,45 @@ get_agent_socket_name (char **gpg_agent_sockname)
   return err;
 }
 
+/* Get the bindir of GPG-AGENT by gpgconf. */
+static gpg_error_t get_agent_bin_dir (char **gpg_agent_bindir)
+{
+  gpg_error_t err = 0;
+  FILE *input;
+  char *result;
+  size_t len;
+
+  *gpg_agent_bindir = NULL;
+
+  result = xtrymalloc (256);
+  if (!result)
+    return gpg_error_from_syserror ();
+
+  /* It is good if we have popen with execv (no SHELL) */
+  input = popen (GNUPG_DEFAULT_GPGCONF " --list-dirs agent-socket", "r");
+  if (input == NULL)
+    {
+      xfree (result);
+      return gpg_error (GPG_ERR_NOT_FOUND);
+    }
+
+  len = fread (result, 1, 256, input);
+  fclose (input);
+
+  if (len)
+    {
+      *gpg_agent_bindir = result;
+      result[len-1] = 0;	/* Chop off the newline.  */
+    }
+  else
+    {
+      xfree (result);
+      err =  gpg_error (GPG_ERR_NOT_FOUND);
+    }
+
+  return err;
+}
+
 /* Helper function for get_scd_socket_from_agent(), which is used by
    scd_connect().
 
@@ -226,6 +265,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
   scd_context_t ctx;
   gpg_error_t err = 0;
   int rt_val = 0;
+  size_t buff_size = 512;
 
   if (fflush (NULL))
     {
@@ -245,14 +285,28 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 
   if (use_agent == 2)
     {
-//	  struct userinfo uinfo;
-//	  uinfo.uid=pw->pw_uid;
-//	  uinfo.gid=pw->pw_gid;
-//	  uinfo.home=pw->pw_dir;
 	  char *scd_socket_name = NULL;
+	  char *gpg_bin_dir = NULL;
+	  char  gpg_connect_agent[buff_size];
+	  char *connect_agent = "gpg-connect-agent";
 
-	  const char *cmd_start_gpg[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
-	  const char *cmd_start_gpg_tty[] = {"/usr/bin/gpg-connect-agent", "UPDATESTARTUPTTY", "/bye", NULL};
+	  err = get_agent_bin_dir(&gpg_bin_dir);
+	  if(err)
+	  {
+		  return err;
+	  }
+
+	  //if not enough room to copy string
+	  if(strlen(gpg_bin_dir) > (buff_size + strlen(connect_agent)+1))
+	  {
+		  return GPG_ERR_GENERAL;
+	  }
+
+	  strcpy(gpg_connect_agent, gpg_bin_dir);
+	  strcat(gpg_connect_agent, "gpg-connect-agent");
+
+	  const char *cmd_start_gpg[] = {gpg_connect_agent, "learn", "/bye", NULL};
+	  const char *cmd_start_gpg_tty[] = {gpg_connect_agent, "UPDATESTARTUPTTY", "/bye", NULL};
 	  int input;
 	  char **env = pam_getenvlist(pam_handle);
 
