@@ -251,18 +251,30 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 //	  uinfo.home=pw->pw_dir;
 	  char *scd_socket_name = NULL;
 
-	  const char *cmd[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
+	  const char *cmd_start_gpg[] = {"/usr/bin/gpg-connect-agent", "learn", "/bye", NULL};
+	  const char *cmd_start_gpg_tty[] = {"/usr/bin/gpg-connect-agent", "/bye", NULL};
 	  int input;
 	  char **env = pam_getenvlist(pam_handle);
 
-	  //runs a command as another user
-	  const int pid = run_as_user(pw, cmd, &input, env);
-
-	  if (env != NULL) {
-	      free(env);
+	  //start gpg as user
+	  const int pid = run_as_user(pw, cmd_start_gpg, &input, env);
+	  waitpid(-1);
+	  if (input < 0)
+	  {
+		  exit(0);
 	  }
-	  if (pid == 0 || input < 0) {
-	      exit(0);
+
+	  //setup gpg tty under user, needed for using gpg-agent ssh with pinentry-qt
+	  const int pid = run_as_user(pw, cmd_start_gpg_tty, &input, env);
+	  waitpid(-1);
+	  if (input < 0)
+	  {
+		  exit(0);
+	  }
+
+	  if (env != NULL)
+	  {
+	      free(env);
 	  }
 
 	  int fd[2];
@@ -1065,7 +1077,9 @@ int run_as_user(const struct passwd *user, const char * const cmd[], int *input,
     if (env != NULL)
     {
         execve(cmd[0], (char * const *) cmd, env);
-    } else {
+    }
+    else
+    {
         execv(cmd[0], (char * const *) cmd);
     }
     exit(EXIT_SUCCESS);
