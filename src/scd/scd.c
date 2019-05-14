@@ -156,7 +156,7 @@ static gpg_error_t get_agent_bin_dir (char **gpg_agent_bindir)
     return gpg_error_from_syserror ();
 
   /* It is good if we have popen with execv (no SHELL) */
-  input = popen (GNUPG_DEFAULT_GPGCONF " --list-dirs agent-socket", "r");
+  input = popen (GNUPG_DEFAULT_GPGCONF " --list-dirs bindir", "r");
   if (input == NULL)
     {
       xfree (result);
