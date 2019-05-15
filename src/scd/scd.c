@@ -118,7 +118,7 @@ get_agent_socket_name (char **gpg_agent_sockname)
 
   /* It is good if we have popen with execv (no SHELL) */
   input = popen (GNUPG_DEFAULT_GPGCONF " --list-dirs agent-socket", "r");
-  if (input == NULL)
+  if (input == (void*) NULL)
     {
       xfree (result);
       return gpg_error (GPG_ERR_NOT_FOUND);
@@ -157,7 +157,7 @@ static gpg_error_t get_agent_bin_dir (char **gpg_agent_bindir)
 
   /* It is good if we have popen with execv (no SHELL) */
   input = popen (GNUPG_DEFAULT_GPGCONF " --list-dirs bindir", "r");
-  if (input == NULL)
+  if (input == (void*) NULL)
     {
       xfree (result);
       return gpg_error (GPG_ERR_NOT_FOUND);
