@@ -308,8 +308,6 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  const char *cmd_start_gpg[] = {gpg_connect_agent, "learn", "/bye", NULL};
 	  const char *cmd_start_gpg_tty[] = {gpg_connect_agent, "UPDATESTARTUPTTY", "/bye", NULL};
 
-	  log_msg_error (loghandle, "First: %s, Second: %s",cmd_start_gpg[0], cmd_start_gpg_tty[0]);
-
 	  int input;
 	  char **env = pam_getenvlist(pam_handle);
 

@@ -786,8 +786,8 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_PROCESS_KEYRING);
 	  if (sn == -1)
 	  {
-		  log_msg_error (ctx->loghandle, "Session quitting, Poldi Authentication did'nt run");
-		  err = GPG_ERR_NO_VALUE;
+		  log_msg_error (ctx->loghandle, "Session quitting, Poldi Authentication did not run");
+		  err = GPG_ERR_BAD_PASSPHRASE;
 		  goto out;
 	  }
 
