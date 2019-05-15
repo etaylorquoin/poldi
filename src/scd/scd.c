@@ -312,7 +312,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  char **env = pam_getenvlist(pam_handle);
 
 	  //start gpg as user
-	  run_as_user(pw, cmd_start_gpg, &input, env);
+	  run_as_user(pw, loghandle, cmd_start_gpg, &input, env);
 	  waitpid(-1, &rt_val, 0);
 	  if (input < 0 || rt_val == EXIT_FAILURE)
 	  {
@@ -320,7 +320,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  }
 
 	  //setup gpg tty under user, needed for using gpg-agent ssh with pinentry-qt
-	  run_as_user(pw, cmd_start_gpg_tty, &input, env);
+	  run_as_user(pw, loghandle, cmd_start_gpg_tty, &input, env);
 	  waitpid(-1, &rt_val, 0);
 	  if (input < 0 || rt_val == EXIT_FAILURE)
 	  {
@@ -348,7 +348,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 	  if (frk_val != 0)
 	  {
 		  //parent process reading only, close write descriptor
-		  close_safe(fd[1]);
+		  close_safe(fd[1], loghandle);
 		  //read data from child
 		  rt_val = read(fd[0], pipe_buff, maxBuffSize);
 		  if (rt_val == -1)
@@ -356,11 +356,11 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 			  return GPG_ERR_GENERAL;
 		  }
 		  //close read
-		  close_safe(fd[0]);
+		  close_safe(fd[0], loghandle);
 	  }
 	  else//child process
 	  {
-		  close_safe(fd[0]);
+		  close_safe(fd[0], loghandle);
 
 		  //switch to user process
 		  rt_val = setgid(pw->pw_gid);
@@ -390,7 +390,7 @@ scd_connect (scd_context_t *scd_ctx, int use_agent, const char *scd_path,
 		  }
 
 		  //close write and exit
-		  close_safe(fd[1]);
+		  close_safe(fd[1], loghandle);
 		  exit(0);
 	  }
 	  //wait for child to finish
@@ -1076,7 +1076,7 @@ scd_getinfo (scd_context_t ctx, const char *what, char **result)
 }
 
 
-int run_as_user(const struct passwd *user, const char * const cmd[], int *input, char **env)
+int run_as_user(const struct passwd *user, log_handle_t loghandle, const char * const cmd[], int *input, char **env)
 {
     int inp[2] = {-1, -1};
     int pid;
@@ -1093,8 +1093,8 @@ int run_as_user(const struct passwd *user, const char * const cmd[], int *input,
     switch (pid = fork())
     {
     case -1:
-        close_safe(inp[READ_END]);
-        close_safe(inp[WRITE_END]);
+        close_safe(inp[READ_END], loghandle);
+        close_safe(inp[WRITE_END], loghandle);
         *input = -1;
         return FALSE;
 
@@ -1102,7 +1102,7 @@ int run_as_user(const struct passwd *user, const char * const cmd[], int *input,
         break;
 
     default:
-        close_safe(inp[READ_END]);
+        close_safe(inp[READ_END], loghandle);
         return pid;
     }
 
@@ -1113,8 +1113,8 @@ int run_as_user(const struct passwd *user, const char * const cmd[], int *input,
         exit(EXIT_FAILURE);
     }
 
-    close_safe(inp[READ_END]);
-    close_safe(inp[WRITE_END]);
+    close_safe(inp[READ_END], loghandle);
+    close_safe(inp[WRITE_END], loghandle);
 
     if ((dev_null = open("/dev/null", O_WRONLY)) != -1)
     {
