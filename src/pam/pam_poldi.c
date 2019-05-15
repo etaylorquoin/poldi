@@ -707,7 +707,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  conv = NULL;
 	  ctx = NULL;
 	  method_parse = NULL;
-	  err = 0;
+	  err = GPG_ERR_NO_ERROR;
 
 
 
@@ -781,6 +781,16 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 		/* Last try...  */
 		log_set_backend_syslog (ctx->loghandle);
 	    }
+
+	  //check for required  key stored by poldi auth
+	  key_serial_t sn = request_key("user", "pam-poldi-key", "Payload data", KEY_SPEC_PROCESS_KEYRING);
+	  if (sn == -1)
+	  {
+		  log_msg_error (ctx->loghandle, "Session quitting, Poldi Authentication did'nt run");
+		  err = GPG_ERR_NO_VALUE;
+		  goto out;
+	  }
+
 
 	  /*** Sanity checks. ***/
 
