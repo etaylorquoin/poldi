@@ -1142,7 +1142,7 @@ int run_as_user(const struct passwd *user, const char * const cmd[], int *input,
 
 void close_safe(int fd)
 {
-    if (fd != NULL)
+    if (fd != (void*) NULL)
     {
         close(fd);
     }
