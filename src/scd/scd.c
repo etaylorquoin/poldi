@@ -1087,6 +1087,7 @@ int run_as_user(const struct passwd *user, const char * const cmd[], int *input,
         *input = -1;
         return 0;
     }
+
     *input = inp[WRITE_END];
 
     switch (pid = fork())
@@ -1105,7 +1106,7 @@ int run_as_user(const struct passwd *user, const char * const cmd[], int *input,
         return pid;
     }
 
-    /* We're in the child process now */
+    //in child process
 
     if (dup2(inp[READ_END], STDIN_FILENO) < 0)
     {
@@ -1137,14 +1138,18 @@ int run_as_user(const struct passwd *user, const char * const cmd[], int *input,
     {
         execv(cmd[0], (char * const *) cmd);
     }
+
     exit(EXIT_SUCCESS);
 }
 
-void close_safe(int fd)
+void close_safe(int fd, log_handle_t loghandle)
 {
-    if (fd != (void*) NULL)
-    {
-        close(fd);
-    }
+     int rt = close(fd);
+
+     if(rt == -1)
+     {
+    	 log_msg_error (loghandle, "Error Closing file descriptor: %s\n", strerror(errno));
+     }
+
 }
 /* END */
