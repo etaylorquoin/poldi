@@ -1081,6 +1081,7 @@ int run_as_user(const struct passwd *user, log_handle_t loghandle, const char * 
     int inp[2] = {-1, -1};
     int pid;
     int dev_null;
+    int rt_val;
 
     if (pipe(inp) < 0)
     {
@@ -1090,7 +1091,9 @@ int run_as_user(const struct passwd *user, log_handle_t loghandle, const char * 
 
     *input = inp[WRITE_END];
 
-    switch (pid = fork())
+    pid = fork();
+
+    switch (pid)
     {
     case -1:
         close_safe(inp[READ_END], loghandle);
@@ -1108,7 +1111,8 @@ int run_as_user(const struct passwd *user, log_handle_t loghandle, const char * 
 
     //in child process
 
-    if (dup2(inp[READ_END], STDIN_FILENO) < 0)
+    rt_val = dup2(inp[READ_END], STDIN_FILENO);
+    if ( rt_val == -1 )
     {
         exit(EXIT_FAILURE);
     }
@@ -1116,11 +1120,27 @@ int run_as_user(const struct passwd *user, log_handle_t loghandle, const char * 
     close_safe(inp[READ_END], loghandle);
     close_safe(inp[WRITE_END], loghandle);
 
-    if ((dev_null = open("/dev/null", O_WRONLY)) != -1)
+    //attempt to link stdout and stderr to /dev/null if it exist
+    dev_null = open("/dev/null", O_WRONLY);
+    if ( dev_null != -1)
     {
-        dup2(dev_null, STDOUT_FILENO);
-        dup2(dev_null, STDERR_FILENO);
-        close(dev_null);
+        rt_val = dup2(dev_null, STDOUT_FILENO);
+        if(rt_val == -1)
+        {
+        	exit(EXIT_FAILURE);
+        }
+
+        rt_val = dup2(dev_null, STDERR_FILENO);
+        if(rt_val == -1)
+		{
+			exit(EXIT_FAILURE);
+		}
+
+        rt_val = close(dev_null);
+        if(rt_val == -1)
+		{
+			exit(EXIT_FAILURE);
+		}
     }
 
     if (seteuid(getuid()) < 0 || setegid(getgid()) < 0 ||
@@ -1145,10 +1165,19 @@ int run_as_user(const struct passwd *user, log_handle_t loghandle, const char * 
 void close_safe(int fd, log_handle_t loghandle)
 {
      int rt = close(fd);
+     errno = 0;
 
      if(rt == -1)
      {
-    	 log_msg_error (loghandle, "Error Closing file descriptor: %s\n", strerror(errno));
+    	 if(errno != 0)
+    	 {
+    		 log_msg_error (loghandle, "Error Closing file descriptor: %s\n", strerror(errno));
+    	 }
+    	 else
+    	 {
+    		 log_msg_error (loghandle, "Error Closing file descriptor\n");
+    	 }
+
      }
 
 }

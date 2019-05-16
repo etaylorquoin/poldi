@@ -707,7 +707,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  conv = NULL;
 	  ctx = NULL;
 	  method_parse = NULL;
-	  err = GPG_ERR_NO_ERROR;
+	  err = GPG_ERR_NO_PIN_ENTRY;
 
 
 
