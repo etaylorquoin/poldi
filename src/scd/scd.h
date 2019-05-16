@@ -27,6 +27,7 @@
 #include <security/pam_appl.h>
 
 #include "util/simplelog.h"
+#include "util/key-types.h"
 
 struct scd_context;
 
@@ -90,6 +91,7 @@ void scd_release_cardinfo (struct scd_cardinfo cardinfo);
    *R_BUF, *R_BUFLEN will hold the length of the signature. */
 gpg_error_t scd_pksign (scd_context_t ctx,
 			const char *keyid,
+      key_types key_type,
 			const unsigned char *indata, size_t indatalen,
 			unsigned char **r_buf, size_t *r_buflen);
 
@@ -106,6 +108,7 @@ int scd_getinfo (scd_context_t ctx, const char *what, char **result);
 /* Initializer objet for struct scd_cardinfo instances.  */
 extern struct scd_cardinfo scd_cardinfo_null;
 
-int run_as_user(const struct userinfo *user, const char * const cmd[], int *input, char **env);
-void close_safe(int fd);
+int run_as_user(const struct passwd *user, log_handle_t loghandle, const char * const cmd[], int *input, char **env);
+void close_safe(int fd, log_handle_t loghandle);
+
 #endif
