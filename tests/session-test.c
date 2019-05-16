@@ -12,7 +12,8 @@
 #include <simplelog.h>
 #include "scd/scd.h"
 
-#define MAX_LENGTH      512
+#define MAX_STR_LENGTH      	   513
+#define MAX_USABLE_STR_LENGTH      512
 #define str(x)          # x
 #define xstr(x)         str(x)
 
@@ -111,9 +112,9 @@ int main (int argc, char*const* argv)
 	printf("Testing poldi-session \n");
 
 	//get test pin from user
-	char buff[MAX_LENGTH];
+	char buff[MAX_STR_LENGTH];
 	printf("Enter pin: ");
-	err = scanf("%"xstr(MAX_LENGTH)"s", buff);
+	err = scanf("%"xstr(MAX_USABLE_STR_LENGTH)"s", buff);
 
 	//scanf error
 	if(err <= 0)
