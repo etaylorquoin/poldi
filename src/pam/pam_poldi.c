@@ -707,7 +707,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  conv = NULL;
 	  ctx = NULL;
 	  method_parse = NULL;
-	  err = GPG_ERR_NO_PIN_ENTRY;
+	  err = GPG_ERR_NO_ERROR;
 
 
 
@@ -787,7 +787,7 @@ int pam_sm_open_session(pam_handle_t *pam_handle, int flags, int argc, const cha
 	  if (sn == -1)
 	  {
 		  log_msg_error (ctx->loghandle, "Session quitting, Poldi Authentication did not run");
-		  err = GPG_ERR_BAD_PASSPHRASE;
+		  err = GPG_ERR_NO_PIN_ENTRY;
 		  goto out;
 	  }
 
