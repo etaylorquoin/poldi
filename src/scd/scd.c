@@ -182,6 +182,46 @@ agent_scd_getinfo_socket_name (assuan_context_t ctx, char **socket_name)
   return err;
 }
 
+/* Get the bindir of GPG-AGENT by gpgconf. */
+static gpg_error_t get_agent_bin_dir (char **gpg_agent_bindir)
+{
+  gpg_error_t err = 0;
+  FILE *input;
+  char *result;
+  size_t len;
+
+  *gpg_agent_bindir = NULL;
+
+  result = xtrymalloc (256);
+  if (!result)
+    return gpg_error_from_syserror ();
+
+  /* It is good if we have popen with execv (no SHELL) */
+  input = popen (GNUPG_DEFAULT_GPGCONF " --list-dirs bindir", "r");
+  if (input == (void*) NULL)
+    {
+      xfree (result);
+      return gpg_error (GPG_ERR_NOT_FOUND);
+    }
+
+  len = fread (result, 1, 256, input);
+  fclose (input);
+
+  if (len)
+    {
+      *gpg_agent_bindir = result;
+      result[len-1] = 0;	/* Chop off the newline.  */
+    }
+  else
+    {
+      xfree (result);
+      err =  gpg_error (GPG_ERR_NOT_FOUND);
+    }
+
+  return err;
+}
+
+
 /* Retrieve SCDaemons socket name through a running gpg-agent.  On
    success, *SOCKET_NAME contains a copy of the socket name.  Returns
    proper error code or zero on success.  */
